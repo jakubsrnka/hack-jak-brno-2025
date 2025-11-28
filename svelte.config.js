@@ -3,17 +3,18 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// Consult https://svelte.dev/docs/kit/integrations
-	// for more information about preprocessors
-	preprocess: vitePreprocess(),
-	kit: { adapter: adapter(),
+  // Consult https://svelte.dev/docs/kit/integrations
+  // for more information about preprocessors
+  preprocess: vitePreprocess(),
+  kit: {
+    adapter: adapter(),
     alias: {
       $components: './src/components',
       $types: './src/lib/types',
       $lib: './src/lib',
       $styles: './src/styles'
     }
-	}
+  }
 };
 
 export default config;
