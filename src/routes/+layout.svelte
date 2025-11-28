@@ -13,7 +13,7 @@
 
 <Sidebar.Provider>
   <AppSidebar />
-  <main>
+  <main class="flex flex-col w-full p-3">
     <Sidebar.Trigger />
     {@render children()}
   </main>
