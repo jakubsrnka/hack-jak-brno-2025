@@ -5,7 +5,7 @@
   import { Input } from '$components/ui/input';
   import { Spinner } from '$components/ui/spinner';
   import { defaultSearchKeys, type SearchKey } from '$lib/constants/settingsDefaults';
-  import { currentUser, pbClient } from '$lib/pocketbase';
+  import { currentUser } from '$lib/pocketbase';
   import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
   import {
@@ -14,15 +14,12 @@
   } from '$lib/helpers/xmlDocumentationToPBType';
   import {
     createEmptyReport,
-    createRecords,
-    getPatientReport,
-    insertPatient,
-    setReportSummary
+    createRecords, fetchReportSummary,
+    insertPatient
   } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
   import { goto } from '$app/navigation';
   import { SvelteMap } from 'svelte/reactivity';
-  import type { ReportSummaryResponse } from '$types/openai';
 
   type Props = {
     open?: boolean;
@@ -40,15 +37,12 @@
   let isLoading = $state(false);
   let selectedFile: FileList | undefined = $state(undefined);
 
-  // Store checkbox overrides (keys that user has toggled) using SvelteMap for reactivity
   let checkboxOverrides = new SvelteMap<string, boolean>();
 
-  // Derive checkbox states based on current searchKeys and overrides
   const checkboxes = $derived.by(() => {
     const state: Record<string, boolean> = {};
     for (const key of searchKeys) {
       const keyId = `search-key-${key.id}`;
-      // Use override if available, otherwise default to true (checked)
       state[keyId] = checkboxOverrides.has(keyId) ? checkboxOverrides.get(keyId)! : true;
     }
     return state;
@@ -63,7 +57,6 @@
     const patientId = extractPatientIdFromData(data);
     const patient = await insertPatient(patientId);
 
-    // We send labels to the model
     const selectedLabels: string[] = searchKeys
       .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
       .map((searchKey) => searchKey.key);
@@ -73,22 +66,7 @@
     const records = extractDocumentationRecords(data, patient.id);
     await createRecords(report.id, records);
 
-    const fullReport = await getPatientReport(report.id);
-
-    const response = await fetch('/api/v1/public/report-summary', {
-      method: 'POST',
-      body: JSON.stringify({
-        report: fullReport,
-        wantedKeyParts: selectedLabels
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const responseData = (await response.json()) as ReportSummaryResponse;
-    await setReportSummary(report.id, responseData.summary, responseData.shortSummary);
+    await fetchReportSummary(report.id, selectedLabels);
 
     return { patient, report };
   }

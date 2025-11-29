@@ -1,5 +1,5 @@
 import { pbClient } from '$lib/pocketbase';
-import type { KeyPart, RecordAIData } from '$types/openai';
+import type { KeyPart, RecordAIData, ReportSummaryResponse } from '$types/openai';
 import {
   Collections,
   type CreateBase,
@@ -149,6 +149,25 @@ export const fetchRecordAIData = async (
 
   return (await response.json()) as RecordAIData;
 };
+
+export async function fetchReportSummary(reportId: string, selectedLabels: string[]) {
+  const fullReport = await getPatientReport(reportId);
+
+  const response = await fetch('/api/v1/public/report-summary', {
+    method: 'POST',
+    body: JSON.stringify({
+      report: fullReport,
+      wantedKeyParts: selectedLabels
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const responseData = (await response.json()) as ReportSummaryResponse;
+  await setReportSummary(fullReport.id, responseData.summary, responseData.shortSummary);
+}
 
 export const setRecordAIData = async (recordId: string, data: RecordAIData) => {
   const collection = pbClient.collection(Collections.PatientRecords);
