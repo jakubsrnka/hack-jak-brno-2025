@@ -3,7 +3,8 @@ import type { KeyPart } from '$types/openai';
 import {
   Collections,
   type PatientRecordsResponse,
-  type PatientReportsResponse
+  type PatientReportsResponse,
+  type PatientsResponse
 } from '$types/pocketbase';
 
 export const getPatientReport = async (
@@ -16,3 +17,10 @@ export const getPatientReport = async (
   pbClient.collection(Collections.PatientReports).getOne(id, {
     expand: 'patientRecords_via_report'
   });
+
+export const getPatientsByDoctor = async (doctorIds: string[]): Promise<PatientsResponse[]> => {
+  const filterConditions = doctorIds.map(id => `doctor ~ "${id}"`).join(' || ');
+  return pbClient
+    .collection(Collections.Patients)
+    .getFullList<PatientsResponse>({ filter: filterConditions });
+};
