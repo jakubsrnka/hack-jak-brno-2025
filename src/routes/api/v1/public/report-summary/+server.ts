@@ -22,19 +22,19 @@ const WORDS_PER_KEYPART = 50;
 // reason: stručné zdůvodnění, proč je to důležité
 
 type RequestBody = {
-  record: PatientReportsResponse<{
+  report: PatientReportsResponse<{
     patientRecords_via_report: PatientRecordsResponse<KeyPart[]>[];
   }>;
   wantedKeyParts: string[];
 };
 
-export const GET = async ({ request }) => {
+export const POST = async ({ request }) => {
   const body = (await request.json()) as RequestBody;
 
-  const { record, wantedKeyParts } = body;
+  const { report, wantedKeyParts } = body;
 
   // Calculate maxKeyParts for each record based on text length
-  record.expand.patientRecords_via_report.map((r) => {
+  report.expand.patientRecords_via_report.map((r) => {
     console.log(`Record ID: ${r.id}, Text length: ${r.text.split(' ').length} words`);
     return {
       ...r,
@@ -51,7 +51,7 @@ export const GET = async ({ request }) => {
 
 ${wantedKeyParts.map((keyPart) => REPORT_SUMMARY_OPTIONS.find((option) => option.id === keyPart)?.label).join(', ')}
 
-${JSON.stringify(record)}
+${JSON.stringify(report)}
 `,
     text: {
       format: {
