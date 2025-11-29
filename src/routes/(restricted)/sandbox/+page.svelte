@@ -4,7 +4,12 @@
   import { pbClient } from '$lib/pocketbase';
   import { getPatientReport } from '$lib/services';
   import type { KeyPart } from '$types/openai';
-  import { Collections, type PatientsRecord } from '$types/pocketbase';
+  import {
+    Collections,
+    type PatientReportsRecord,
+    type PatientsRecord,
+    type PatientsResponse
+  } from '$types/pocketbase';
 
   let buttonText = $state('Send to AI');
 
@@ -49,9 +54,11 @@
 
       const data: AIResponse = await response.json();
 
-      // pbClient.collection(Collections.PatientRecords).update<PatientsRecord>('sgqx2g5zu70ayj8', {
-      //   summary: data.summary
-      // });
+      // pbClient
+      //   .collection(Collections.PatientReports)
+      //   .update<PatientReportsRecord>('sgqx2g5zu70ayj8', {
+      //     summary: data.summary
+      //   });
 
       // data.records.forEach(async (record) => {
       //   await pbClient.collection(Collections.PatientRecords).update(record.id, {
