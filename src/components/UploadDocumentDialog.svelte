@@ -5,7 +5,7 @@
   import { Label } from '$components/ui/label';
   import { Input } from '$components/ui/input';
   import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions';
-  import {convertXML} from 'simple-xml-to-json'
+  import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
 
   type Props = {
@@ -19,10 +19,13 @@
   // Initialize checkboxes with default values from the options
   let selectedFile: FileList | undefined = $state(undefined);
   let checkboxes = $state<Record<string, boolean>>(
-    reportOptions.reduce((acc, option) => {
-      acc[option.id] = option.defaultValue;
-      return acc;
-    }, {} as Record<string, boolean>)
+    reportOptions.reduce(
+      (acc, option) => {
+        acc[option.id] = option.defaultValue;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    )
   );
 
   function handleSubmit() {
@@ -31,7 +34,9 @@
       return;
     }
 
-    const selectedOptions = Object.entries(checkboxes).filter(([, checked]) => checked).map(([key]) => key);
+    const selectedOptions = Object.entries(checkboxes)
+      .filter(([, checked]) => checked)
+      .map(([key]) => key);
     console.log('Selected options:', selectedOptions);
 
     const reader = new FileReader();
@@ -46,10 +51,13 @@
 
   function resetForm() {
     selectedFile = undefined;
-    checkboxes = reportOptions.reduce((acc, option) => {
-      acc[option.id] = option.defaultValue;
-      return acc;
-    }, {} as Record<string, boolean>);
+    checkboxes = reportOptions.reduce(
+      (acc, option) => {
+        acc[option.id] = option.defaultValue;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
   }
 
   function handleCancel() {
