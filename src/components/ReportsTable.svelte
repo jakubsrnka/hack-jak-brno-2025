@@ -1,20 +1,24 @@
 <script lang="ts">
-  import { Check, ChevronsUpDown, Calendar, CalendarArrowUp } from 'lucide-svelte';
-  import { type PatientsResponse } from '$types/pocketbase';
+  import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
+  import { type PatientsResponse, type PatientReportsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
   import * as Command from '$components/ui/command';
   import { Button } from '$components/ui/button';
-  import * as Card from '$components/ui/card';
+  import ReportCard from '$components/ReportCard.svelte';
   import { RangeCalendar } from '$components/ui/range-calendar';
   import { cn } from '$lib/utils';
   import { getLocale } from '$lib/paraglide/runtime';
   import type { DateRange } from 'bits-ui';
   import { m } from '$lib/paraglide/messages';
 
+  type PatientReportWithPatient = PatientReportsResponse<{
+    patient: PatientsResponse;
+  }>;
+
   interface Props {
-    data: any[];
-    onRowClick?: (row: any) => void;
+    data: PatientReportWithPatient[];
+    onRowClick?: (row: PatientReportWithPatient) => void;
     patients: Promise<PatientsResponse[]>;
   }
 
@@ -25,12 +29,8 @@
   let dateRange = $state<DateRange | undefined>(undefined);
   let isCalendarOpen = $state(false);
 
-  function getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
-  }
-
-  function getPatientName(item: any): string {
-    return getNestedValue(item, 'expand.patient.uuid') || 'Unknown Patient';
+  function getPatientName(item: PatientReportWithPatient): string {
+    return item.expand.patient.uuid || 'Unknown Patient';
   }
 
   function togglePatientSelection(patientUuid: string) {
@@ -39,8 +39,8 @@
       : [...selectedPatients, patientUuid];
   }
 
-  function isPatientVisible(item: any): boolean {
-    const patientUuid = getNestedValue(item, 'expand.patient.uuid');
+  function isPatientVisible(item: PatientReportWithPatient): boolean {
+    const patientUuid = item.expand.patient.uuid;
     const isPatientSelected =
       selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
 
@@ -156,41 +156,12 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {#each data as item, idx (idx)}
         {#if isPatientVisible(item)}
-          <Card.Root
+          <ReportCard
+            patientName={getPatientName(item)}
+            created={item.created}
+            shortSummary={item.shortSummary}
             onclick={() => onRowClick?.(item)}
-            class="cursor-pointer hover:shadow-lg transition-shadow"
-          >
-            <Card.Header class="flex flex-col gap-4">
-              <Card.Title class="flex justify-between items-center gap-2 w-full"
-                >{getPatientName(item)}
-                {#if item.created}
-                  <div>
-                    <div class="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-                      <CalendarArrowUp class="size-4" />
-                      {new Date(item.created).toLocaleDateString(getLocale(), {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </div>
-                  </div>
-                {/if}
-              </Card.Title>
-            </Card.Header>
-            <Card.Content>
-              {#if item.shortSummary}
-                <div>
-                  <div class="text-xs font-semibold text-muted-foreground uppercase">
-                    {m.reports_shortSummary()}
-                  </div>
-                  <div class="text-sm font-medium line-clamp-4">
-                    <!-- eslint-disable-next-line -->
-                    {@html item.shortSummary}
-                  </div>
-                </div>
-              {/if}
-            </Card.Content>
-          </Card.Root>
+          />
         {/if}
       {/each}
     </div>
