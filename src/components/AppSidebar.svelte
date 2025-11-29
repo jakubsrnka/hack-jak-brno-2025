@@ -47,6 +47,11 @@
         <Sidebar.Footer>
           <Sidebar.Menu>
             <Sidebar.MenuItem>
+              <Sidebar.MenuButton onclick={openUploadDialog}>
+                <span>Nahrát dokumentaci</span>
+              </Sidebar.MenuButton>
+            </Sidebar.MenuItem>
+            <Sidebar.MenuItem>
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                   {#snippet child({ props })}
@@ -60,9 +65,6 @@
                   {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content side="top" class="w-(--bits-dropdown-menu-anchor-width)">
-                  <DropdownMenu.Item onclick={openUploadDialog}>
-                    <span>Nahrát dokumentaci</span>
-                  </DropdownMenu.Item>
                   <DropdownMenu.Item>
                     <Button variant="destructive" class="w-full text-left" onclick={logout}
                       >{m.sidepanel_logout()}</Button
