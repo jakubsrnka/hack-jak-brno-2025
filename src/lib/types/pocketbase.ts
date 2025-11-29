@@ -120,6 +120,7 @@ export type PatientsRecord = {
   doctor: RecordIdString[];
   id: string;
   updated: IsoAutoDateString;
+  uuid: string;
 };
 
 export type UsersRecord = {
