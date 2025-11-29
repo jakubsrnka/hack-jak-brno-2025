@@ -3,9 +3,16 @@
   import UploadDocumentDialog from '$components/UploadDocumentDialog.svelte';
   import { uploadDocumentDialogOpen } from '$lib/stores/dialog';
   import { ModeWatcher } from 'mode-watcher';
+  import { onMount } from 'svelte';
+  import { currentUser } from '$lib/pocketbase';
+  import { initializeTheme } from '$lib/stores/theme';
   import '../app.css';
 
   let { children } = $props();
+
+  onMount(() => {
+    initializeTheme($currentUser);
+  });
 </script>
 
 <svelte:head>
@@ -18,6 +25,6 @@
 </svelte:head>
 
 <Toaster richColors />
-<ModeWatcher />
+<ModeWatcher track={false} defaultMode="light" />
 {@render children()}
 <UploadDocumentDialog bind:open={$uploadDocumentDialogOpen} />

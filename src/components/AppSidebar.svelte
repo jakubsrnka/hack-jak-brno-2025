@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Sidebar from '$components/ui/sidebar';
-  import { Users, House, ChevronUp, Upload, NotebookPen } from 'lucide-svelte';
+  import { Users, House, ChevronUp, Upload, NotebookPen, Settings } from 'lucide-svelte';
   import * as DropdownMenu from '$components/ui/dropdown-menu';
   import { currentUser, logout } from '$lib/pocketbase';
   import { Button } from '$components/ui/button';
@@ -19,6 +19,11 @@
       title: 'Pacienti',
       url: '/patients',
       icon: Users
+    },
+    {
+      title: 'Nastavení',
+      url: '/settings',
+      icon: Settings
     }
   ];
 
@@ -65,8 +70,8 @@
 <Sidebar.Root>
   <Sidebar.Content>
     <Sidebar.Group class="h-full">
-      <Sidebar.GroupLabel onclick={() => goto('/')}
-        ><NotebookPen class="mr-2" />
+      <Sidebar.GroupLabel onclick={() => goto('/')}>
+        <NotebookPen class="mr-2" />
         <span class="font-bold">Docuhelper</span></Sidebar.GroupLabel
       >
       <Sidebar.Separator class="mb-2" />
@@ -107,7 +112,8 @@
             <Sidebar.MenuItem>
               <Sidebar.MenuButton onclick={openUploadDialog}>
                 <div class="flex gap-1.5 items-center hover:cursor-pointer">
-                  <Upload size={16} />Nahrát dokumentaci
+                  <Upload size={16} />
+                  Nahrát dokumentaci
                 </div>
               </Sidebar.MenuButton>
             </Sidebar.MenuItem>

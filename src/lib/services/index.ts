@@ -102,3 +102,15 @@ export const createRecords = async (
 
   return createdRecords as PatientRecordsResponse[];
 };
+
+export const updateUserSettings = async (settings: Record<string, unknown>) => {
+  const currentUserId = pbClient.authStore.record?.id;
+
+  if (!currentUserId) {
+    throw new Error('No authenticated user found');
+  }
+
+  return await pbClient.collection(Collections.Users).update(currentUserId, {
+    settings
+  });
+};
