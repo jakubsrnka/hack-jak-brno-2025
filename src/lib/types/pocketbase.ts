@@ -123,7 +123,7 @@ export type PatientsRecord = {
   uuid: string;
 };
 
-export type UsersRecord = {
+export type UsersRecord<Tsettings = unknown> = {
   avatar?: FileNameString;
   created: IsoAutoDateString;
   email: string;
@@ -131,6 +131,7 @@ export type UsersRecord = {
   id: string;
   name: string;
   password: string;
+  settings?: null | Tsettings;
   tokenKey: string;
   updated: IsoAutoDateString;
   verified?: boolean;
@@ -153,7 +154,10 @@ export type PatientReportsResponse<Texpand = unknown> = Required<PatientReportsR
   BaseSystemFields<Texpand>;
 export type PatientsResponse<Texpand = unknown> = Required<PatientsRecord> &
   BaseSystemFields<Texpand>;
-export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>;
+export type UsersResponse<Tsettings = unknown, Texpand = unknown> = Required<
+  UsersRecord<Tsettings>
+> &
+  AuthSystemFields<Texpand>;
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 

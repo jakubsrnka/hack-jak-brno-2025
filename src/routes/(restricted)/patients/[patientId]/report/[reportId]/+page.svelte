@@ -1,10 +1,6 @@
 <script lang="ts">
   import * as Select from '$components/ui/select/index.js';
-  import type {
-    IsoAutoDateString,
-    PatientRecordsRecord,
-    PatientRecordsResponse
-  } from '$types/pocketbase';
+  import type { PatientRecordsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
   import { onMount } from 'svelte';
