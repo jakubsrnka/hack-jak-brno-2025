@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import PatientRecordCard from '$components/PatientRecordCard.svelte';
+  import * as Select from '$components/ui/select/index.js';
   import type { IsoAutoDateString, PatientRecordsRecord } from '$types/pocketbase';
+
+  let selectedRecordType = $state<string | null>(null);
+
   // Souhrn toho co si vybral aby mu chat vyplivnul
-  let reportId = page.params.reportId;
   const patientRecords: PatientRecordsRecord[] = [
     {
       id: '1',
@@ -29,7 +31,24 @@
 </script>
 
 <div class="flex flex-col gap-4">
+  <Select.Root type="single">
+    <Select.Trigger class="w-[180px]">
+      {selectedRecordType ?? 'Typ záznamu'}
+    </Select.Trigger>
+    <Select.Content>
+      {#each patientRecords as record (record.id)}
+        <Select.Item value={record.type} onclick={() => (selectedRecordType = record.type)}>
+          {record.type}
+        </Select.Item>
+      {/each}
+      <Select.Item value="all" onclick={() => (selectedRecordType = null)}>
+        Všechny typy
+      </Select.Item>
+    </Select.Content>
+  </Select.Root>
   {#each patientRecords as record (record.id)}
-    <PatientRecordCard patientRecord={record} />
+    {#if selectedRecordType === null || selectedRecordType === record.type}
+      <PatientRecordCard patientRecord={record} />
+    {/if}
   {/each}
 </div>
