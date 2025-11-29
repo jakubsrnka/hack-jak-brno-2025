@@ -66,8 +66,11 @@ ${record.text}
             type: 'json_schema',
             name: 'record',
             schema: JSON.parse(
-              Object.entries(RECORD_REPLACEMENTS).reduce((acc, [key, value]) => acc.replaceAll(key, value), recordSchema
-            ))
+              Object.entries(RECORD_REPLACEMENTS).reduce(
+                (acc, [key, value]) => acc.replaceAll(key, value),
+                recordSchema
+              )
+            )
           }
         }
       });

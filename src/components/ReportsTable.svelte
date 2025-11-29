@@ -175,7 +175,9 @@
                 {/if}
                 {#if item.created}
                   <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">Vytvořeno</div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">
+                      Vytvořeno
+                    </div>
                     <div class="text-sm font-medium">
                       {new Date(item.created).toLocaleDateString(getLocale(), {
                         year: 'numeric',
