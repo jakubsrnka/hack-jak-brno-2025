@@ -4,6 +4,9 @@
   import { Checkbox } from '$components/ui/checkbox';
   import { Label } from '$components/ui/label';
   import { Input } from '$components/ui/input';
+  import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions';
+  import {convertXML} from 'simple-xml-to-json'
+  import type { XmlDocumentation } from '$types/xmlDocumentation';
 
   type Props = {
     open?: boolean;
@@ -11,37 +14,42 @@
 
   let { open = $bindable(false) }: Props = $props();
 
+  const reportOptions = REPORT_SUMMARY_OPTIONS;
+
+  // Initialize checkboxes with default values from the options
   let selectedFile: FileList | undefined = $state(undefined);
-  let checkboxes = $state({
-    personalData: false,
-    medicalHistory: false,
-    diagnoses: false,
-    medications: false
-  });
+  let checkboxes = $state<Record<string, boolean>>(
+    reportOptions.reduce((acc, option) => {
+      acc[option.id] = option.defaultValue;
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
 
   function handleSubmit() {
-    const selectedOptions = Object.entries(checkboxes)
-      .filter(([, checked]) => checked)
-      .map(([key]) => key);
+    if (!selectedFile || selectedFile.length === 0) {
+      alert('Prosím, nahrajte XML dokument.');
+      return;
+    }
 
-    console.log('Uploaded file:', selectedFile?.[0]);
+    const selectedOptions = Object.entries(checkboxes).filter(([, checked]) => checked).map(([key]) => key);
     console.log('Selected options:', selectedOptions);
 
-    // TODO: Add your submission logic here
-
-    // Reset and close dialog
-    resetForm();
-    open = false;
+    const reader = new FileReader();
+    reader.readAsText(selectedFile[0]);
+    reader.onload = () => {
+      const xmlContent = reader.result as string;
+      const data = convertXML(xmlContent) as XmlDocumentation;
+      console.log('Converted JSON data:', data);
+      // Here you can further process the jsonData as needed
+    };
   }
 
   function resetForm() {
     selectedFile = undefined;
-    checkboxes = {
-      personalData: false,
-      medicalHistory: false,
-      diagnoses: false,
-      medications: false
-    };
+    checkboxes = reportOptions.reduce((acc, option) => {
+      acc[option.id] = option.defaultValue;
+      return acc;
+    }, {} as Record<string, boolean>);
   }
 
   function handleCancel() {
@@ -68,25 +76,12 @@
       <div class="space-y-3 pt-2">
         <Label>Vyberte data k zobrazení</Label>
 
-        <div class="flex items-center space-x-2">
-          <Checkbox id="personal-data" bind:checked={checkboxes.personalData} />
-          <Label for="personal-data" class="cursor-pointer">Osobní údaje</Label>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <Checkbox id="medical-history" bind:checked={checkboxes.medicalHistory} />
-          <Label for="medical-history" class="cursor-pointer">Zdravotní historie</Label>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <Checkbox id="diagnoses" bind:checked={checkboxes.diagnoses} />
-          <Label for="diagnoses" class="cursor-pointer">Diagnózy</Label>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <Checkbox id="medications" bind:checked={checkboxes.medications} />
-          <Label for="medications" class="cursor-pointer">Medikace</Label>
-        </div>
+        {#each reportOptions as option (option.id)}
+          <div class="flex items-center space-x-2">
+            <Checkbox id={option.id} bind:checked={checkboxes[option.id]} />
+            <Label for={option.id} class="cursor-pointer">{option.label}</Label>
+          </div>
+        {/each}
       </div>
     </div>
 
