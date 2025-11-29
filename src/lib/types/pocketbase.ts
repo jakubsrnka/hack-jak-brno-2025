@@ -11,8 +11,8 @@ export enum Collections {
   Mfas = '_mfas',
   Otps = '_otps',
   Superusers = '_superusers',
-  PatientForms = 'patient_forms',
-  PatientRecords = 'patient_records',
+  PatientRecords = 'patientRecords',
+  PatientReports = 'patientReports',
   Patients = 'patients',
   Users = 'users'
 }
@@ -95,39 +95,44 @@ export type SuperusersRecord = {
   verified?: boolean;
 };
 
-export type PatientFormsRecord<Tform = unknown> = {
+export type PatientRecordsRecord<TkeyParts = unknown> = {
   created: IsoAutoDateString;
-  form?: null | Tform;
+  date: IsoDateString;
   id: string;
-  patient?: RecordIdString;
-  record?: RecordIdString;
+  keyParts?: null | TkeyParts;
+  report: RecordIdString;
+  summary?: string;
+  text: string;
+  type: string;
   updated: IsoAutoDateString;
 };
 
-export type PatientRecordsRecord = {
+export type PatientReportsRecord = {
   created: IsoAutoDateString;
-  date?: IsoDateString;
   id: string;
-  text?: string;
-  type?: string;
+  patient: RecordIdString;
+  shortSummary?: string;
+  summary?: HTMLString;
   updated: IsoAutoDateString;
 };
 
 export type PatientsRecord = {
   created: IsoAutoDateString;
-  doctor?: RecordIdString[];
+  doctor: RecordIdString[];
   id: string;
   updated: IsoAutoDateString;
+  uuid: string;
 };
 
-export type UsersRecord = {
+export type UsersRecord<Tsettings = unknown> = {
   avatar?: FileNameString;
   created: IsoAutoDateString;
   email: string;
   emailVisibility?: boolean;
   id: string;
-  name?: string;
+  name: string;
   password: string;
+  settings?: null | Tsettings;
   tokenKey: string;
   updated: IsoAutoDateString;
   verified?: boolean;
@@ -142,15 +147,18 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>;
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> &
   AuthSystemFields<Texpand>;
-export type PatientFormsResponse<Tform = unknown, Texpand = unknown> = Required<
-  PatientFormsRecord<Tform>
+export type PatientRecordsResponse<TkeyParts = unknown, Texpand = unknown> = Required<
+  PatientRecordsRecord<TkeyParts>
 > &
   BaseSystemFields<Texpand>;
-export type PatientRecordsResponse<Texpand = unknown> = Required<PatientRecordsRecord> &
+export type PatientReportsResponse<Texpand = unknown> = Required<PatientReportsRecord> &
   BaseSystemFields<Texpand>;
 export type PatientsResponse<Texpand = unknown> = Required<PatientsRecord> &
   BaseSystemFields<Texpand>;
-export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>;
+export type UsersResponse<Tsettings = unknown, Texpand = unknown> = Required<
+  UsersRecord<Tsettings>
+> &
+  AuthSystemFields<Texpand>;
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
@@ -160,8 +168,8 @@ export type CollectionRecords = {
   _mfas: MfasRecord;
   _otps: OtpsRecord;
   _superusers: SuperusersRecord;
-  patient_forms: PatientFormsRecord;
-  patient_records: PatientRecordsRecord;
+  patientRecords: PatientRecordsRecord;
+  patientReports: PatientReportsRecord;
   patients: PatientsRecord;
   users: UsersRecord;
 };
@@ -172,8 +180,8 @@ export type CollectionResponses = {
   _mfas: MfasResponse;
   _otps: OtpsResponse;
   _superusers: SuperusersResponse;
-  patient_forms: PatientFormsResponse;
-  patient_records: PatientRecordsResponse;
+  patientRecords: PatientRecordsResponse;
+  patientReports: PatientReportsResponse;
   patients: PatientsResponse;
   users: UsersResponse;
 };
@@ -185,8 +193,7 @@ type ProcessCreateAndUpdateFields<T> = Omit<
     // Omit AutoDate fields
     [K in keyof T as Extract<T[K], IsoAutoDateString> extends never
       ? K
-      : never]: // Convert FileNameString to File
-    T[K] extends infer U
+      : never]: T[K] extends infer U // Convert FileNameString to File
       ? U extends FileNameString | FileNameString[]
         ? U extends any[]
           ? File[]
