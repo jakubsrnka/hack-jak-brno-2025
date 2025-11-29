@@ -13,7 +13,7 @@
       </Card.Title>
     </Card.Header>
     <Card.Content>
-      <p>Pacient: {patient.id}</p>
+      <p>Pacient: {patient.uuid}</p>
     </Card.Content>
   </Card.Root>
 </a>

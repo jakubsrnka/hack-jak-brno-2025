@@ -7,7 +7,10 @@
   import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions';
   import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
-  import { extractDocumentationRecords, extractPatientIdFromData } from '$lib/helpers/xmlDocumentationToPBType';
+  import {
+    extractDocumentationRecords,
+    extractPatientIdFromData
+  } from '$lib/helpers/xmlDocumentationToPBType';
   import { createEmptyReport, createRecords, insertPatient } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
 
@@ -103,7 +106,13 @@
     <div class="space-y-4 py-4">
       <div class="space-y-2">
         <Label for="file-upload">XML dokument</Label>
-        <Input id="file-upload" type="file" accept=".xml" bind:files={selectedFile} disabled={isLoading} />
+        <Input
+          id="file-upload"
+          type="file"
+          accept=".xml"
+          bind:files={selectedFile}
+          disabled={isLoading}
+        />
       </div>
 
       <div class="space-y-3 pt-2">
@@ -124,7 +133,9 @@
     </Dialog.Footer>
 
     {#if isLoading}
-      <div class="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div
+        class="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
+      >
         <Spinner class="size-12 text-primary" />
         <p class="mt-4 text-sm text-muted-foreground">Zpracovávám dokument...</p>
       </div>

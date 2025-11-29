@@ -1,118 +1,28 @@
 <script lang="ts">
   import * as Select from '$components/ui/select/index.js';
-  import type { IsoAutoDateString, PatientRecordsRecord } from '$types/pocketbase';
+  import type {
+    IsoAutoDateString,
+    PatientRecordsRecord,
+    PatientRecordsResponse
+  } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
+  import { onMount } from 'svelte';
+  import { getPatientRecords } from '$lib/services';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
-
-  // Souhrn toho co si vybral aby mu chat vyplivnul
-  const patientRecords: PatientRecordsRecord[] = [
-    {
-      id: '1',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: ['key1', 'key2', 'key1', 'key2'] as string[],
-      type: 'type1',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '2',
-      report: '2',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '3',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '4',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '5',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '6',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '7',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '8',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    },
-    {
-      id: '9',
-      report: '1',
-      date: new Date().toISOString(),
-      keyParts: [] as string[],
-      type: 'type2',
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString,
-      summary: 'Summary text',
-      text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sit amet tempor nisl, id accumsan elit. Vivamus dolor odio, scelerisque sit amet vestibulum eu, tempus in felis. Duis ac odio in nulla euismod scelerisque vitae ac mauris. Proin facilisis justo quis sollicitudin commodo. Integer non dui nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Suspendisse convallis eget nulla quis condimentum. In hac habitasse platea dictumst. In non condimentum augue. Vestibulum tincidunt vitae neque non facilisis. Nulla tristique quis mauris eu eleifend.`
-    }
-  ];
+  let patientRecords: PatientRecordsResponse[] = $state([]);
 
   const uniqueRecordTypes = $derived(
     [...new Set(patientRecords.map((record) => record.type))].sort()
   );
+
+  onMount(async () => {
+    if (reportId) {
+      patientRecords = await getPatientRecords(reportId);
+    }
+  });
 </script>
 
 <div class="flex gap-4 h-[calc(100vh-4rem)] relative">
