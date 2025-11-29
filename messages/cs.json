@@ -12,5 +12,5 @@
   "login_password": "Heslo",
   "login_successfulLogin": "Úspěšné přihlášení!",
   "login_wrongCredentials": "Špatné přihlašovací údaje",
-  "sidepanel_logout": "Odhlášení"
+  "sidepanel_logout": "Odhlásit se"
 }
