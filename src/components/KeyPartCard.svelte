@@ -29,9 +29,11 @@
         <div class="w-5 h-5 rounded-2xl" style:background-color={importanceColor}></div>
       </span>
     </Card.Title>
-    <Card.Description>
-      {#each keyPart.types as type}
-        <Badge variant="default" class={'text-white ' + importanceColor}>{type}</Badge>
+    <Card.Description class="flex flex-wrap gap-1 whitespace-normal">
+      {#each keyPart.types as type (type)}
+        <Badge variant="default"
+               class={'text-white inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap ' + importanceColor}
+               title={type}>{type}</Badge>
       {/each}
     </Card.Description>
   </Card.Header>
