@@ -7,15 +7,17 @@
     class: className,
     children,
     ...restProps
-  }: WithElementRef<HTMLAttributes<HTMLUListElement>, HTMLUListElement> = $props();
+  }: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
-<ul
+<div
   bind:this={ref}
-  data-slot="sidebar-menu"
-  data-sidebar="menu"
-  class={cn('flex w-full min-w-0 flex-col gap-1', className)}
+  data-slot="card-header"
+  class={cn(
+    '@container/card-header has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6',
+    className
+  )}
   {...restProps}
 >
   {@render children?.()}
-</ul>
+</div>

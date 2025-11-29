@@ -4,18 +4,17 @@
 
   let {
     ref = $bindable(null),
-    children,
     class: className,
+    children,
     ...restProps
-  }: WithElementRef<HTMLAttributes<HTMLLIElement>> = $props();
+  }: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
-<li
+<div
   bind:this={ref}
-  data-slot="sidebar-menu-sub-item"
-  data-sidebar="menu-sub-item"
-  class={cn('group/menu-sub-item relative', className)}
+  data-slot="card-footer"
+  class={cn('[.border-t]:pt-6 flex items-center px-6', className)}
   {...restProps}
 >
   {@render children?.()}
-</li>
+</div>
