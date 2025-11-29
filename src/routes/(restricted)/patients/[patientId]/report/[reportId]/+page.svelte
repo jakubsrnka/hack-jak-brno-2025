@@ -3,7 +3,7 @@
   import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { getPatientRecords, getPatientReport } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
   import Label from '$components/ui/label/label.svelte';
@@ -12,6 +12,8 @@
   import ClockIcon from 'lucide-svelte/icons/clock';
   import { browser } from '$app/environment';
   import BigSummary from '$components/BigSummary.svelte';
+  import { pbClient } from '$lib/pocketbase';
+  import { Collections } from '$types/pocketbase';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
@@ -46,6 +48,12 @@
       patientRecords = await getPatientRecords(reportId);
       patientReport = await getPatientReport(reportId);
 
+      // Subscribe to real-time updates for this report
+      pbClient.collection(Collections.PatientReports).subscribe(reportId, (e) => {
+        console.log('Report updated:', e);
+        patientReport = e.record as PatientReportsResponse;
+      });
+
       if (browser && window.location.hash) {
         const recordId = window.location.hash.substring(1);
         setTimeout(() => {
@@ -55,6 +63,13 @@
           }
         }, 100);
       }
+    }
+  });
+
+  onDestroy(() => {
+    // Unsubscribe from real-time updates when component is destroyed
+    if (reportId) {
+      pbClient.collection(Collections.PatientReports).unsubscribe(reportId);
     }
   });
 </script>
