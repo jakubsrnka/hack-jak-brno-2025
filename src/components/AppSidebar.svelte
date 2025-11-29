@@ -34,8 +34,7 @@
 <Sidebar.Root>
   <Sidebar.Content>
     <Sidebar.Group class="h-full">
-      <Sidebar.GroupLabel onclick={() => goto('/')}
-      >
+      <Sidebar.GroupLabel onclick={() => goto('/')}>
         <NotebookPen class="mr-2" />
         <span class="font-bold">Docuhelper</span></Sidebar.GroupLabel
       >
@@ -82,7 +81,7 @@
                 <DropdownMenu.Content side="top" class="w-(--bits-dropdown-menu-anchor-width)">
                   <DropdownMenu.Item>
                     <Button variant="destructive" class="w-full text-left" onclick={logout}
-                    >{m.sidepanel_logout()}</Button
+                      >{m.sidepanel_logout()}</Button
                     >
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>

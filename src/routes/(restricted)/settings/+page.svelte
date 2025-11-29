@@ -6,6 +6,7 @@
   import { Checkbox } from '$components/ui/checkbox';
   import { Label } from '$components/ui/label';
   import { toast } from 'svelte-sonner';
+  import { setDarkMode } from '$lib/stores/theme';
 
   // Define settings interface
   interface UserSettings {
@@ -30,6 +31,7 @@
     isSaving = true;
     try {
       await updateUserSettings(settings);
+      setDarkMode(settings.darkMode);
       toast.success('Nastavení úspěšně uloženo');
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -41,7 +43,12 @@
 
   function handleReset() {
     settings = getDefaultSettings();
+    setDarkMode(settings.darkMode);
     toast.info('Nastavení obnoveno na uložené hodnoty');
+  }
+
+  function handleDarkModeChange() {
+    setDarkMode(settings.darkMode);
   }
 </script>
 
@@ -69,6 +76,7 @@
           <Checkbox
             id="dark-mode"
             bind:checked={settings.darkMode}
+            onchange={handleDarkModeChange}
           />
         </div>
       </CardContent>
@@ -80,23 +88,15 @@
         <CardTitle>Záznamy</CardTitle>
         <CardDescription>Nastavte předvolby pro práci se záznamy</CardDescription>
       </CardHeader>
-      <CardContent class="space-y-6">
-      </CardContent>
+      <CardContent class="space-y-6"></CardContent>
     </Card>
 
     <!-- Save Button -->
     <div class="flex justify-end gap-4">
-      <Button
-        variant="outline"
-        onclick={handleReset}
-        disabled={isSaving}
-      >
-        Obnovit
-      </Button>
+      <Button variant="outline" onclick={handleReset} disabled={isSaving}>Obnovit</Button>
       <Button onclick={handleSave} disabled={isSaving}>
         {isSaving ? 'Ukládání...' : 'Uložit nastavení'}
       </Button>
     </div>
   </div>
 </div>
-
