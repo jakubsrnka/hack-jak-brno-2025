@@ -94,8 +94,7 @@
                 variant="outline"
                 size="sm"
                 onclick={() => {
-                  goto(`/patients/${page.params.patientId}/report/${reportId}`);
-                  // Scroll to the record would be nice but requires more implementation
+                  goto(`/patients/${page.params.patientId}/report/${reportId}#${record.id}`);
                 }}
               >
                 Zobrazit detail

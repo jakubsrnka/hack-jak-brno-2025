@@ -10,6 +10,7 @@
   import { Button } from '$components/ui/button';
   import { goto } from '$app/navigation';
   import ClockIcon from 'lucide-svelte/icons/clock';
+  import { browser } from '$app/environment';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
@@ -41,6 +42,16 @@
   onMount(async () => {
     if (reportId) {
       patientRecords = await getPatientRecords(reportId);
+
+      if (browser && window.location.hash) {
+        const recordId = window.location.hash.substring(1);
+        setTimeout(() => {
+          const element = document.getElementById(recordId);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
     }
   });
 </script>
@@ -83,7 +94,9 @@
     </div>
     <div class="flex flex-col gap-4 flex-1">
       {#each filteredRecords as record (record.id)}
-        <RecordBlock patientRecord={record} {searchQuery} />
+        <div id={record.id}>
+          <RecordBlock patientRecord={record} {searchQuery} />
+        </div>
       {/each}
     </div>
   </div>
