@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
-  import { type PatientsResponse } from '$types/pocketbase';
+  import { type PatientsResponse, type PatientReportsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
   import * as Command from '$components/ui/command';
@@ -12,9 +12,13 @@
   import type { DateRange } from 'bits-ui';
   import { m } from '$lib/paraglide/messages';
 
+  type PatientReportWithPatient = PatientReportsResponse<{
+    patient: PatientsResponse;
+  }>;
+
   interface Props {
-    data: any[];
-    onRowClick?: (row: any) => void;
+    data: PatientReportWithPatient[];
+    onRowClick?: (row: PatientReportWithPatient) => void;
     patients: Promise<PatientsResponse[]>;
   }
 
@@ -25,12 +29,8 @@
   let dateRange = $state<DateRange | undefined>(undefined);
   let isCalendarOpen = $state(false);
 
-  function getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
-  }
-
-  function getPatientName(item: any): string {
-    return getNestedValue(item, 'expand.patient.uuid') || 'Unknown Patient';
+  function getPatientName(item: PatientReportWithPatient): string {
+    return item.expand.patient.uuid || 'Unknown Patient';
   }
 
   function togglePatientSelection(patientUuid: string) {
@@ -39,8 +39,8 @@
       : [...selectedPatients, patientUuid];
   }
 
-  function isPatientVisible(item: any): boolean {
-    const patientUuid = getNestedValue(item, 'expand.patient.uuid');
+  function isPatientVisible(item: PatientReportWithPatient): boolean {
+    const patientUuid = item.expand.patient.uuid;
     const isPatientSelected =
       selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
 

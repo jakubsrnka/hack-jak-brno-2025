@@ -73,7 +73,7 @@
               </Sidebar.MenuButton>
               {#if hasSubMenu(item.url) && $subMenuStore.length > 0}
                 <Sidebar.MenuSub>
-                  {#each $subMenuStore as subItem}
+                  {#each $subMenuStore as subItem, idx (idx)}
                     <Sidebar.MenuSubItem>
                       <Sidebar.MenuSubButton isActive={isActive(subItem.url)} href={subItem.url}>
                         {subItem.title}
