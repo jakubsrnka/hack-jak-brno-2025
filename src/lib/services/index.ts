@@ -20,6 +20,25 @@ export const getPatientReport = async (
     expand: 'patientRecords_via_report'
   });
 
+export const getPatientsByDoctor = async (doctorIds: string[]): Promise<PatientsResponse[]> => {
+  const filterConditions = doctorIds.map((id) => `doctor ~ "${id}"`).join(' || ');
+  return pbClient
+    .collection(Collections.Patients)
+    .getFullList<PatientsResponse>({ filter: filterConditions });
+};
+
+export const getPatientReports = async (patientId: string): Promise<PatientReportsResponse[]> => {
+  return pbClient
+    .collection(Collections.PatientReports)
+    .getFullList<PatientReportsResponse>({ filter: `patient="${patientId}"` });
+};
+
+export const getPatientRecords = async (reportId: string): Promise<PatientRecordsResponse[]> => {
+  return pbClient
+    .collection(Collections.PatientRecords)
+    .getFullList<PatientRecordsResponse>({ filter: `report="${reportId}"` });
+};
+
 export const insertPatient = async (patientId: string): Promise<PatientsResponse> => {
   const collection = pbClient.collection(Collections.Patients);
   const currentDoctorId = pbClient.authStore.record?.id;

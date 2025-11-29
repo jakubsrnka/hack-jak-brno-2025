@@ -1,8 +1,8 @@
 <script lang="ts">
   import * as Card from '$components/ui/card/index.js';
-  import type { PatientsRecord } from '$types/pocketbase';
+  import type { PatientsResponse } from '$types/pocketbase';
   import { User } from 'lucide-svelte';
-  let { patient }: { patient: PatientsRecord } = $props();
+  let { patient }: { patient: PatientsResponse } = $props();
 </script>
 
 <a href="/patients/{patient.id}">
@@ -13,7 +13,7 @@
       </Card.Title>
     </Card.Header>
     <Card.Content>
-      <p>Pacient: {patient.id}</p>
+      <p>Pacient: {patient.uuid}</p>
     </Card.Content>
   </Card.Root>
 </a>
