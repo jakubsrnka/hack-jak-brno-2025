@@ -6,13 +6,15 @@
       id: '1',
       doctor: ['honza'],
       created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString
+      updated: new Date().toISOString() as IsoAutoDateString,
+      uuid: ''
     },
     {
       id: '2',
       doctor: ['honza'],
       created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString
+      updated: new Date().toISOString() as IsoAutoDateString,
+      uuid: ''
     }
   ];
 </script>

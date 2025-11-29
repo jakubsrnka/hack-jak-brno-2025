@@ -2,21 +2,25 @@
   import { page } from '$app/state';
   import PatientReportCard from '$components/PatientReportCard.svelte';
   import type { IsoAutoDateString, PatientReportsRecord } from '$types/pocketbase';
+
   let patientId = page.params.patientId;
+
   const patientReports: PatientReportsRecord[] = [
     {
       id: '1',
       patient: '1',
-      record: ['1'],
-      report: [],
       created: new Date().toISOString() as IsoAutoDateString,
       updated: new Date().toISOString() as IsoAutoDateString
     },
     {
       id: '2',
+      patient: '1',
+      created: new Date().toISOString() as IsoAutoDateString,
+      updated: new Date().toISOString() as IsoAutoDateString
+    },
+    {
+      id: '3',
       patient: '2',
-      record: ['2'],
-      report: [],
       created: new Date().toISOString() as IsoAutoDateString,
       updated: new Date().toISOString() as IsoAutoDateString
     }

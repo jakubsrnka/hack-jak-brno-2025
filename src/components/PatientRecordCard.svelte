@@ -2,9 +2,23 @@
   import type { PatientRecordsRecord } from '$types/pocketbase';
   import * as Card from '$components/ui/card/index.js';
   import * as Accordion from '$components/ui/accordion/index.js';
-  let { patientRecord }: { patientRecord: PatientRecordsRecord } = $props();
+  let {
+    patientRecord,
+    openRecordIds = $bindable(),
+    isOpen = $bindable()
+  }: {
+    patientRecord: PatientRecordsRecord;
+    openRecordIds?: Set<string>;
+    isOpen?: boolean;
+  } = $props();
 
   let value = $state<string>();
+
+  $effect(() => {
+    if (isOpen !== undefined) {
+      isOpen = value === 'item-1';
+    }
+  });
 </script>
 
 <Accordion.Root type="single" bind:value class="cursor-pointer w-full">
