@@ -208,7 +208,7 @@
               {@html highlightedSummary}
             </span>
             <div class="flex flex-wrap gap-1">
-              {#each keyParts as part}
+              {#each keyParts as part, idx (idx)}
                 <Badge
                   variant="default"
                   class="{part.importance === 1

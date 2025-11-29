@@ -1,12 +1,10 @@
 <script lang="ts">
-  import * as Select from '$components/ui/select/index.js';
   import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
   import { onMount } from 'svelte';
   import { getPatientRecords, getPatientReport } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
-  import Label from '$components/ui/label/label.svelte';
   import { Button } from '$components/ui/button';
   import { goto } from '$app/navigation';
   import ClockIcon from 'lucide-svelte/icons/clock';
@@ -162,7 +160,7 @@
               <Command.List>
                 <Command.Empty>Typ nenalezen</Command.Empty>
                 <Command.Group>
-                  {#each recordTypeOptions as recordType}
+                  {#each recordTypeOptions as recordType, idx (idx)}
                     <Command.Item
                       value={recordType.value}
                       onSelect={() => {
@@ -206,7 +204,7 @@
               <Command.List>
                 <Command.Empty>Typ nenalezen</Command.Empty>
                 <Command.Group>
-                  {#each keyPartTypeOptions as keyPartType}
+                  {#each keyPartTypeOptions as keyPartType, idx (idx)}
                     <Command.Item
                       value={keyPartType.value}
                       onSelect={() => {
