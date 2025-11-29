@@ -1,126 +1,195 @@
-<script lang="ts" generics="TData, TValue">
-  import {
-    type ColumnDef,
-    type SortingState,
-    type ColumnFiltersState,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel
-  } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$components/ui/data-table';
-  import * as Table from '$components/ui/table';
-  import { Input } from '$components/ui/input';
-  import { ArrowDownAZ, ArrowUpZA } from 'lucide-svelte';
+<script lang="ts">
+  import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
+  import { type PatientsResponse } from '$types/pocketbase';
+  import { Skeleton } from '$components/ui/skeleton';
+  import * as Popover from '$components/ui/popover';
+  import * as Command from '$components/ui/command';
+  import { Button } from '$components/ui/button';
+  import * as Card from '$components/ui/card';
+  import { RangeCalendar } from '$components/ui/range-calendar';
+  import { cn } from '$lib/utils';
+  import { getLocale } from '$lib/paraglide/runtime';
+  import type { DateRange } from 'bits-ui';
 
-  type DataTableProps<TData, TValue> = {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    onRowClick?: (row: TData) => void;
-  };
+  interface Props {
+    data: any[];
+    onRowClick?: (row: any) => void;
+    patients: Promise<PatientsResponse[]>;
+  }
 
-  let { data, columns, onRowClick }: DataTableProps<TData, TValue> = $props();
+  let { data, onRowClick, patients }: Props = $props();
 
-  let sorting = $state<SortingState>([]);
-  let columnFilters = $state<ColumnFiltersState>([]);
+  let selectedPatients = $state<string[]>([]);
+  let isOpen = $state(false);
+  let dateRange = $state<DateRange | undefined>(undefined);
+  let isCalendarOpen = $state(false);
 
-  const table = createSvelteTable({
-    get data() {
-      return data;
-    },
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: (updater) => {
-      if (typeof updater === 'function') {
-        sorting = updater(sorting);
-      } else {
-        sorting = updater;
-      }
-    },
-    onColumnFiltersChange: (updater) => {
-      if (typeof updater === 'function') {
-        columnFilters = updater(columnFilters);
-      } else {
-        columnFilters = updater;
-      }
-    },
-    state: {
-      get sorting() {
-        return sorting;
-      },
-      get columnFilters() {
-        return columnFilters;
-      }
-    }
-  });
+  function getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((current, prop) => current?.[prop], obj);
+  }
+
+  function getPatientName(item: any): string {
+    return getNestedValue(item, 'expand.patient.uuid') || 'Unknown Patient';
+  }
+
+  function togglePatientSelection(patientUuid: string) {
+    selectedPatients = selectedPatients.includes(patientUuid)
+      ? selectedPatients.filter((uuid) => uuid !== patientUuid)
+      : [...selectedPatients, patientUuid];
+  }
+
+  function isPatientVisible(item: any): boolean {
+    const patientUuid = getNestedValue(item, 'expand.patient.uuid');
+    const isPatientSelected =
+      selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
+
+    if (!isPatientSelected) return false;
+
+    if (!dateRange?.start) return true;
+
+    const itemDate = new Date(item.created);
+    const startDate = new Date(
+      dateRange.start.year,
+      dateRange.start.month - 1,
+      dateRange.start.day
+    );
+    const endDate = dateRange.end
+      ? new Date(dateRange.end.year, dateRange.end.month - 1, dateRange.end.day)
+      : startDate;
+
+    return itemDate >= startDate && itemDate <= endDate;
+  }
+
+  function formatDateRange(): string {
+    if (!dateRange?.start) return 'Select dates...';
+
+    const startDate = new Date(
+      dateRange.start.year,
+      dateRange.start.month - 1,
+      dateRange.start.day
+    );
+    const start = startDate.toLocaleDateString(getLocale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    if (!dateRange.end) return start;
+
+    const endDate = new Date(dateRange.end.year, dateRange.end.month - 1, dateRange.end.day);
+    const end = endDate.toLocaleDateString(getLocale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    return `${start} - ${end}`;
+  }
 </script>
 
 <div class="space-y-4">
-  <div class="flex items-center gap-2 py-4">
-    <Input
-      placeholder="Filter by patient name..."
-      value={(table.getColumn('patient')?.getFilterValue() as string) ?? ''}
-      onchange={(e) => {
-        table.getColumn('patient')?.setFilterValue(e.currentTarget.value);
-      }}
-      oninput={(e) => {
-        table.getColumn('patient')?.setFilterValue(e.currentTarget.value);
-      }}
-      class="max-w-sm"
-    />
-  </div>
-  <div class="rounded-md border mx-8">
-    <Table.Root>
-      <Table.Header>
-        {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-          <Table.Row>
-            {#each headerGroup.headers as header (header.id)}
-              <Table.Head colspan={header.colSpan}>
-                {#if !header.isPlaceholder}
-                  <button
-                    onclick={header.column.getToggleSortingHandler()}
-                    class="flex items-center gap-2 hover:opacity-70 cursor-pointer"
-                  >
-                    <FlexRender
-                      content={header.column.columnDef.header}
-                      context={header.getContext()}
-                    />
-                    {#if header.column.getIsSorted() === 'asc'}
-                      <ArrowUpZA class="h-4 w-4" />
-                    {:else if header.column.getIsSorted() === 'desc'}
-                      <ArrowDownAZ class="h-4 w-4" />
-                    {/if}
-                  </button>
-                {/if}
-              </Table.Head>
-            {/each}
-          </Table.Row>
-        {/each}
-      </Table.Header>
-      <Table.Body>
-        {#each table.getRowModel().rows as row (row.id)}
-          <Table.Row
-            data-state={row.getIsSelected() && 'selected'}
-            onclick={() => onRowClick?.(row.original)}
-            class="cursor-pointer hover:bg-muted"
+  <div class="flex items-center gap-2 flex-wrap">
+    {#await patients}
+      <Skeleton class="h-10 w-[200px]" />
+    {:then patientsList}
+      <Popover.Root bind:open={isOpen}>
+        <Popover.Trigger>
+          <Button
+            variant="outline"
+            class="w-[200px] justify-between"
+            role="combobox"
+            aria-expanded={isOpen}
           >
-            {#each row.getVisibleCells() as cell (cell.id)}
-              <Table.Cell
-                style={cell.column.columnDef.size !== 150
-                  ? `width: ${cell.column.columnDef.size}px; min-width: ${cell.column.columnDef.size}px; max-width: ${cell.column.columnDef.size}px;`
-                  : ''}
-              >
-                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-              </Table.Cell>
-            {/each}
-          </Table.Row>
-        {:else}
-          <Table.Row>
-            <Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
-          </Table.Row>
-        {/each}
-      </Table.Body>
-    </Table.Root>
+            {selectedPatients.length > 0
+              ? `${selectedPatients.length} selected`
+              : 'Select patients...'}
+            <ChevronsUpDown class="ms-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </Popover.Trigger>
+        <Popover.Content class="w-[200px] p-0">
+          <Command.Root>
+            <Command.Input placeholder="Search patients..." />
+            <Command.List>
+              <Command.Empty>No patients found.</Command.Empty>
+              <Command.Group>
+                {#each patientsList as patient (patient.uuid)}
+                  <Command.Item
+                    value={patient.uuid}
+                    onSelect={() => togglePatientSelection(patient.uuid)}
+                  >
+                    <Check
+                      class={cn(
+                        'me-2 size-4',
+                        selectedPatients.includes(patient.uuid) ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {patient.uuid}
+                  </Command.Item>
+                {/each}
+              </Command.Group>
+            </Command.List>
+          </Command.Root>
+        </Popover.Content>
+      </Popover.Root>
+    {/await}
+
+    <Popover.Root bind:open={isCalendarOpen}>
+      <Popover.Trigger>
+        <Button variant="outline" class="w-[250px] justify-between">
+          <div class="flex items-center gap-2">
+            <Calendar class="size-4" />
+            <span>{formatDateRange()}</span>
+          </div>
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content class="w-auto p-0" align="start">
+        <RangeCalendar bind:value={dateRange} />
+      </Popover.Content>
+    </Popover.Root>
   </div>
+
+  <!-- Reports Grid -->
+  {#if data.length === 0}
+    <div class="text-center py-12 text-muted-foreground">No results.</div>
+  {:else}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {#each data as item, idx (idx)}
+        {#if isPatientVisible(item)}
+          <Card.Root
+            onclick={() => onRowClick?.(item)}
+            class="cursor-pointer hover:shadow-lg transition-shadow"
+          >
+            <Card.Header>
+              <Card.Title class="mb-4">{getPatientName(item)}</Card.Title>
+              <div class="space-y-3">
+                {#if item.shortSummary}
+                  <div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">
+                      Short summary
+                    </div>
+                    <div class="text-sm font-medium line-clamp-4">
+                      <!-- eslint-disable-next-line -->
+                      {@html item.shortSummary}
+                    </div>
+                  </div>
+                {/if}
+                {#if item.created}
+                  <div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">Created</div>
+                    <div class="text-sm font-medium">
+                      {new Date(item.created).toLocaleDateString(getLocale(), {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            </Card.Header>
+          </Card.Root>
+        {/if}
+      {/each}
+    </div>
+  {/if}
 </div>

@@ -76,7 +76,7 @@
   }
 </script>
 
-<div class="container mx-auto py-8 px-4 max-w-4xl">
+<div class="container mx-auto max-w-4xl">
   <div class="mb-8">
     <h1 class="text-3xl font-bold">Nastavení</h1>
     <p class="text-muted-foreground mt-2">Spravujte předvolby a nastavení svého účtu</p>
