@@ -7,11 +7,7 @@
     type PatientReportsResponse,
     type PatientsResponse
   } from '$types/pocketbase';
-  import type { ColumnDef } from '@tanstack/table-core';
-  import { createRawSnippet } from 'svelte';
-  import { renderSnippet } from '$components/ui/data-table';
   import { goto } from '$app/navigation';
-  import { getLocale } from '$lib/paraglide/runtime';
 
   type PatientReportWithPatient = PatientReportsResponse<{
     patient: PatientsResponse;
@@ -30,36 +26,6 @@
     const reportId = row.id;
     goto(`/patients/${patientId}/report/${reportId}`);
   };
-
-  export const columns: ColumnDef<PatientReportWithPatient>[] = [
-    {
-      accessorKey: 'expand.patient.uuid',
-      header: 'Patient',
-      enableSorting: true,
-      size: 120
-    },
-    { accessorKey: 'summary', header: 'Summary', enableSorting: false, size: 400 },
-    {
-      accessorKey: 'created',
-      header: 'Created At',
-      enableSorting: true,
-      size: 120,
-      cell: ({ row }) => {
-        const dateSnippet = createRawSnippet<[{ date: string }]>((getDate) => {
-          const { date } = getDate();
-          const formatted = new Date(date).toLocaleDateString(getLocale(), {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          });
-          return {
-            render: () => `<div>${formatted}</div>`
-          };
-        });
-        return renderSnippet(dateSnippet, { date: row.original.created });
-      }
-    }
-  ];
 </script>
 
 {#await data}
@@ -88,5 +54,5 @@
     </table>
   </div>
 {:then loadedData}
-  <ReportsTable data={loadedData} {columns} onRowClick={handleRowClick} {patients} />
+  <ReportsTable data={loadedData} onRowClick={handleRowClick} {patients} />
 {/await}

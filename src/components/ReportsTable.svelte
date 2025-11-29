@@ -162,11 +162,14 @@
             <Card.Header>
               <Card.Title class="mb-4">{getPatientName(item)}</Card.Title>
               <div class="space-y-3">
-                {#if item.summary}
+                {#if item.shortSummary}
                   <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">Summary</div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">
+                      Short summary
+                    </div>
                     <div class="text-sm font-medium line-clamp-4">
-                      {item.summary}
+                      <!-- eslint-disable-next-line -->
+                      {@html item.shortSummary}
                     </div>
                   </div>
                 {/if}
