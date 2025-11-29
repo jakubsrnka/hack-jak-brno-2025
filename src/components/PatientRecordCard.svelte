@@ -26,8 +26,6 @@
   let highlightedSummary = $state('');
   let highlightedText = $state('');
 
-  console.log(keyParts);
-
   function applyDefaultUnderlines(text: string, isSummary: boolean = false): string {
     if (!text) return '';
     if (isSummary) return text;
@@ -94,7 +92,7 @@
     // Start with underlined citations (skip for summary)
     let result = applyDefaultUnderlines(text, isSummary);
 
-    // Highlight hovered citation first (so it takes precedence) - skip for summary
+    // Highlight hovered citations (so they take precedence) - skip for summary
     if (citation && !isSummary) {
       console.log('Highlighting citation:', citation);
       // Find the matching key part to get its importance
@@ -114,31 +112,39 @@
         bgColor = 'bg-yellow-500';
       }
 
-      // Remove starting and ending quotes
-      let cleanedCitation = citation.trim();
-      if (
-        (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
-        (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
-      ) {
-        cleanedCitation = cleanedCitation.slice(1, -1);
-      }
+      // Get all citations for this keypart
+      const citationsToHighlight = matchingPart?.citations
+        ? Array.isArray(matchingPart.citations)
+          ? matchingPart.citations
+          : [matchingPart.citations]
+        : [citation];
 
-      const trimmedCitation = cleanedCitation.trim().toLowerCase();
-      if (trimmedCitation) {
-        // Escape special regex characters and allow flexible whitespace matching
-        const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
-
-        // Find matches case-insensitively in the original text (all occurrences)
-        const tempRegex = new RegExp(flexibleCitation, 'gi');
-        const matches = result.match(tempRegex);
-        console.log('Matches found:', matches);
-
-        if (matches) {
-          // Replace all matches with highlighted version using importance-based color
-          result = result.replace(tempRegex, `<mark class="${bgColor} text-white">$&</mark>`);
+      citationsToHighlight.forEach((citationText) => {
+        // Remove starting and ending quotes
+        let cleanedCitation = citationText.trim();
+        if (
+          (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
+          (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
+        ) {
+          cleanedCitation = cleanedCitation.slice(1, -1);
         }
-      }
+
+        const trimmedCitation = cleanedCitation.trim().toLowerCase();
+        if (trimmedCitation) {
+          // Escape special regex characters and allow flexible whitespace matching
+          const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+
+          // Find matches case-insensitively in the original text (all occurrences)
+          const tempRegex = new RegExp(flexibleCitation, 'gi');
+          const matches = result.match(tempRegex);
+
+          if (matches) {
+            // Replace all matches with highlighted version using importance-based color
+            result = result.replace(tempRegex, `<mark class="${bgColor} text-white">$&</mark>`);
+          }
+        }
+      });
     }
 
     // Highlight search query
@@ -176,6 +182,8 @@
       hoveredCitations && hoveredCitations.length > 0 ? hoveredCitations[0] : null,
       false
     );
+
+    console.log('Highlighted Summary:', hoveredCitations);
   });
 </script>
 
