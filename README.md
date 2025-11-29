@@ -7,6 +7,7 @@ Hackathon project for [Hack jak Brno](https://www.hackjakbrno.cz/) 2025.
 ```bash
 pnpm install
 ```
+
 ```bash
 pnpm dev
 ```
