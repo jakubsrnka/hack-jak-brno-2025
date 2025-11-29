@@ -99,19 +99,19 @@ export type PatientRecordsRecord<TkeyParts = unknown> = {
   created: IsoAutoDateString;
   date: IsoDateString;
   id: string;
-  keyParts: null | TkeyParts;
-  summary: string;
+  keyParts?: null | TkeyParts;
+  report: RecordIdString;
+  summary?: string;
   text: string;
   type: string;
   updated: IsoAutoDateString;
 };
 
-export type PatientReportsRecord<Treport = unknown> = {
+export type PatientReportsRecord = {
   created: IsoAutoDateString;
   id: string;
   patient: RecordIdString;
-  record: RecordIdString[];
-  report: null | Treport;
+  summary?: HTMLString;
   updated: IsoAutoDateString;
 };
 
@@ -120,6 +120,7 @@ export type PatientsRecord = {
   doctor: RecordIdString[];
   id: string;
   updated: IsoAutoDateString;
+  uuid: string;
 };
 
 export type UsersRecord = {
@@ -128,7 +129,7 @@ export type UsersRecord = {
   email: string;
   emailVisibility?: boolean;
   id: string;
-  name?: string;
+  name: string;
   password: string;
   tokenKey: string;
   updated: IsoAutoDateString;
@@ -148,9 +149,7 @@ export type PatientRecordsResponse<TkeyParts = unknown, Texpand = unknown> = Req
   PatientRecordsRecord<TkeyParts>
 > &
   BaseSystemFields<Texpand>;
-export type PatientReportsResponse<Treport = unknown, Texpand = unknown> = Required<
-  PatientReportsRecord<Treport>
-> &
+export type PatientReportsResponse<Texpand = unknown> = Required<PatientReportsRecord> &
   BaseSystemFields<Texpand>;
 export type PatientsResponse<Texpand = unknown> = Required<PatientsRecord> &
   BaseSystemFields<Texpand>;
