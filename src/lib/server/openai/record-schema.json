@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "keyParts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "importance": {
+            "enum": [1, 2, 3],
+            "type": "number"
+          },
+          "citation": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "enum": ["__AVAILABLE_KEYPART_TYPES__"],
+              "type": "string"
+            }
+          }
+        },
+        "required": ["importance", "citation", "reason", "type"],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": ["summary", "keyParts"],
+  "type": "object"
+}

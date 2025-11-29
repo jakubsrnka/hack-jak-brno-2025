@@ -2,7 +2,9 @@ import { json } from '@sveltejs/kit';
 import { OPENAI_API_KEY } from '$env/static/private';
 import OpenAI from 'openai';
 import reportSchema from '$lib/server/openai/report-schema.json';
-import prompt from '$lib/server/openai/prompt.txt';
+import recordSchema from '$lib/server/openai/record-schema.json?raw';
+import reportPrompt from '$lib/server/openai/prompt-report.txt';
+import recordPrompt from '$lib/server/openai/prompt-record.txt';
 import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
 import type { KeyPart } from '$types/openai';
 import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions.js';
@@ -33,23 +35,15 @@ export const POST = async ({ request }) => {
 
   const { report, wantedKeyParts } = body;
 
-  // Calculate maxKeyParts for each record based on text length
-  report.expand.patientRecords_via_report.map((r) => {
-    console.log(`Record ID: ${r.id}, Text length: ${r.text.split(' ').length} words`);
-    return {
-      ...r,
-      maxKeyParts: Math.min(
-        Math.floor(r.text.split(' ').length / WORDS_PER_KEYPART),
-        wantedKeyParts.length
-      )
-    };
-  });
+  const parsedWantedKeyParts = wantedKeyParts
+    .map((keyPart) => REPORT_SUMMARY_OPTIONS.find((option) => option.id === keyPart)?.label)
+    .join(', ');
 
   const response = await friend.responses.create({
     model: 'gpt-5.1',
-    input: `${prompt}
+    input: `${reportPrompt}
 
-${wantedKeyParts.map((keyPart) => REPORT_SUMMARY_OPTIONS.find((option) => option.id === keyPart)?.label).join(', ')}
+${parsedWantedKeyParts}
 
 ${JSON.stringify(report)}
 `,
@@ -62,5 +56,34 @@ ${JSON.stringify(report)}
     }
   });
 
-  return json(JSON.parse(response.output_text));
+  const recordResponses = await Promise.all(
+    report.expand.patientRecords_via_report.map(async (record) => {
+      const recordResponse = await friend.responses.create({
+        model: 'gpt-5.1',
+        input: `${recordPrompt}
+
+Max key parts: ${Math.floor(record.text.split(' ').length / WORDS_PER_KEYPART)}
+
+${JSON.stringify(record)}
+`,
+        text: {
+          format: {
+            type: 'json_schema',
+            name: 'record',
+            schema: JSON.parse(recordSchema.replace('"__AVAILABLE_KEYPART_TYPES__"', wantedKeyParts.map((k) => `"${k}"`).join(', ')))
+          }
+        }
+      });
+
+      return {
+        id: record.id,
+        ...JSON.parse(recordResponse.output_text)
+      };
+    })
+  );
+
+  return json({
+    ...JSON.parse(response.output_text),
+    records: recordResponses
+  });
 };
