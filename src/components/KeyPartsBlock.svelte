@@ -1,15 +1,15 @@
 <script lang="ts">
-  import * as Card from '$components/ui/card/index.js';
+  import type { KeyPart } from '$types/openai';
+  import KeyPartCard from './KeyPartCard.svelte';
 
-  let { keyParts }: { keyParts: string[] } = $props();
+  let {
+    keyParts,
+    hoveredCitation = $bindable()
+  }: { keyParts: KeyPart[]; hoveredCitation?: string | null } = $props();
 </script>
 
-<Card.Root class="h-full w-full cursor-pointer gap-2">
-  <Card.Content>
-    <ul class="list-disc list-inside">
-      {#each keyParts as part}
-        <li>{part}</li>
-      {/each}
-    </ul>
-  </Card.Content>
-</Card.Root>
+<div class="h-full w-full cursor-pointer flex flex-col gap-2">
+  {#each keyParts as part}
+    <KeyPartCard keyPart={part} bind:hoveredCitation />
+  {/each}
+</div>
