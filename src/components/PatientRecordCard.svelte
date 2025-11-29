@@ -49,9 +49,27 @@
 
           const trimmedCitation = cleanedCitation.trim().toLowerCase();
           if (trimmedCitation) {
-            // Escape special regex characters and allow flexible whitespace matching
-            const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+            // Support "..." as a wildcard (match anything) and allow flexible whitespace matching
+            let flexibleCitation: string;
+            if (trimmedCitation.includes('...')) {
+              const parts = trimmedCitation
+                .split('...')
+                .map((p) => p.trim())
+                .filter(Boolean);
+              const escapedParts = parts.map((p) =>
+                p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')
+              );
+              flexibleCitation = escapedParts.join('.*?');
+              if (trimmedCitation.startsWith('...')) {
+                flexibleCitation = '.*?' + flexibleCitation;
+              }
+              if (trimmedCitation.endsWith('...')) {
+                flexibleCitation = flexibleCitation + '.*?';
+              }
+            } else {
+              const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+            }
 
             // Find matches case-insensitively in the original text (all occurrences)
             const tempRegex = new RegExp(flexibleCitation, 'gi');
@@ -131,9 +149,26 @@
 
         const trimmedCitation = cleanedCitation.trim().toLowerCase();
         if (trimmedCitation) {
-          // Escape special regex characters and allow flexible whitespace matching
-          const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+          let flexibleCitation: string;
+          if (trimmedCitation.includes('...')) {
+            const parts = trimmedCitation
+              .split('...')
+              .map((p) => p.trim())
+              .filter(Boolean);
+            const escapedParts = parts.map((p) =>
+              p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')
+            );
+            flexibleCitation = escapedParts.join('.*?');
+            if (trimmedCitation.startsWith('...')) {
+              flexibleCitation = '.*?' + flexibleCitation;
+            }
+            if (trimmedCitation.endsWith('...')) {
+              flexibleCitation = flexibleCitation + '.*?';
+            }
+          } else {
+            const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+          }
 
           // Find matches case-insensitively in the original text (all occurrences)
           const tempRegex = new RegExp(flexibleCitation, 'gi');

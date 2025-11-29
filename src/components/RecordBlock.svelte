@@ -1,13 +1,12 @@
 <script lang="ts">
   import KeyPartsBlock from '$components/KeyPartsBlock.svelte';
   import PatientRecordCard from '$components/PatientRecordCard.svelte';
-  import type { KeyPart } from '$types/openai';
   import type { PatientRecordsRecord, PatientRecordsResponse } from '$types/pocketbase';
   import { fetchRecordAIData, getPatientReport, setRecordAIData } from '$lib/services';
   import { onMount } from 'svelte';
-  import { pbClient } from '$lib/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import { toast } from 'svelte-sonner';
+  import type { KeyPart } from '$types/openai';
 
   let {
     patientRecord,
@@ -33,9 +32,9 @@
     try {
       isLoadingData = true;
 
-      const report = await getPatientReport(reportId)
+      const report = await getPatientReport(reportId);
 
-      const keywords = ((report as unknown) as { keywords?: string[] })?.keywords ?? [];
+      const keywords = (report as unknown as { keywords?: string[] })?.keywords ?? [];
       const aiData = await fetchRecordAIData(recordData.id, keywords);
       await setRecordAIData(recordData.id, aiData);
 
@@ -48,7 +47,7 @@
       console.error('Error fetching AI data for record:', error);
       toast.error((error as Error).message);
     } finally {
-      isLoadingData = false
+      isLoadingData = false;
     }
   });
 </script>
@@ -58,7 +57,9 @@
     <div class="w-full md:w-[70%]">
       <div class="rounded-lg border bg-card p-6">
         <div class="flex items-center gap-2 mb-4">
-          <div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+          <div
+            class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          ></div>
           <p class="text-sm text-muted-foreground">Získávám souhrnné informace...</p>
         </div>
         <Skeleton class="h-4 w-full mb-2" />

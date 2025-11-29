@@ -14,7 +14,8 @@
   } from '$lib/helpers/xmlDocumentationToPBType';
   import {
     createEmptyReport,
-    createRecords, fetchReportSummary,
+    createRecords,
+    fetchReportSummary,
     insertPatient
   } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
@@ -66,7 +67,9 @@
     const records = extractDocumentationRecords(data, patient.id);
     await createRecords(report.id, records);
 
-    await fetchReportSummary(report.id, selectedLabels);
+    fetchReportSummary(report.id, selectedLabels).catch((error) => {
+      console.error('Background summary generation failed:', error);
+    });
 
     return { patient, report };
   }
