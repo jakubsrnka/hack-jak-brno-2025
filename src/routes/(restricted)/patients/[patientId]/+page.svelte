@@ -1,26 +1,18 @@
 <script lang="ts">
   import { page } from '$app/state';
   import PatientReportCard from '$components/PatientReportCard.svelte';
-  import type { IsoAutoDateString, PatientReportsRecord } from '$types/pocketbase';
+  import { getPatientReports } from '$lib/services';
+  import type { PatientReportsResponse } from '$types/pocketbase';
+  import { onMount } from 'svelte';
+
   let patientId = page.params.patientId;
-  const patientReports: PatientReportsRecord[] = [
-    {
-      id: '1',
-      patient: '1',
-      record: ['1'],
-      report: [],
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString
-    },
-    {
-      id: '2',
-      patient: '2',
-      record: ['2'],
-      report: [],
-      created: new Date().toISOString() as IsoAutoDateString,
-      updated: new Date().toISOString() as IsoAutoDateString
+  let patientReports: PatientReportsResponse[] = $state([]);
+
+  onMount(async () => {
+    if (patientId) {
+      patientReports = await getPatientReports(patientId);
     }
-  ];
+  });
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

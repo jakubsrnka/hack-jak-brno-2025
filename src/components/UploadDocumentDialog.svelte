@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as Dialog from '$components/ui/dialog';
   import { Button } from '$components/ui/button';
   import { Checkbox } from '$components/ui/checkbox';
   import { Label } from '$components/ui/label';
@@ -8,6 +7,12 @@
   import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions';
   import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
+  import {
+    extractDocumentationRecords,
+    extractPatientIdFromData
+  } from '$lib/helpers/xmlDocumentationToPBType';
+  import { createEmptyReport, createRecords, insertPatient } from '$lib/services';
+  import * as Dialog from '$components/ui/dialog';
 
   type Props = {
     open?: boolean;
@@ -44,10 +49,15 @@
 
     const reader = new FileReader();
     reader.readAsText(selectedFile[0]);
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const xmlContent = reader.result as string;
         const data = convertXML(xmlContent) as XmlDocumentation;
+        const patientId = extractPatientIdFromData(data);
+        const patient = await insertPatient(patientId);
+        const report = await createEmptyReport(patient.id);
+        const records = extractDocumentationRecords(data, patient.id);
+        await createRecords(report.id, records);
         console.log('Converted JSON data:', data);
 
         resetForm();
