@@ -5,14 +5,13 @@ export type KeyPart = {
   type: string[];
 };
 
-export type Record = {
+export type RecordAIData = {
   id: string;
   summary: string; // eventually remove if is not reliable
   keyParts: KeyPart[];
 };
 
-export type Report = {
-  id: string;
+export type AIResponse = {
   summary: string;
-  records: Record[];
+  records: RecordAIData[];
 };
