@@ -3,46 +3,123 @@
   import * as Card from '$components/ui/card/index.js';
   import * as Accordion from '$components/ui/accordion/index.js';
   import { formatDateTime } from '$lib/utils';
+  import type { KeyPart } from '$types/openai';
   let {
     patientRecord,
     openRecordIds = $bindable(),
     isOpen = $bindable(),
     searchQuery = '',
-    hoveredCitation = $bindable()
+    hoveredCitation = $bindable(),
+    keyParts
   }: {
     patientRecord: PatientRecordsRecord;
     openRecordIds?: Set<string>;
     isOpen?: boolean;
     searchQuery?: string;
     hoveredCitation?: string | null;
+    keyParts: KeyPart[];
   } = $props();
 
   let value = $state<string | undefined>(isOpen ? 'item-1' : undefined);
   let highlightedSummary = $state('');
   let highlightedText = $state('');
 
-  function highlightText(text: string | undefined, query: string, citation: string | null): string {
+  console.log(keyParts);
+
+  function applyDefaultUnderlines(text: string): string {
     if (!text) return '';
 
     let result = text;
 
+    keyParts.forEach((part) => {
+      let citation = part.citation;
+      if (citation) {
+        // Remove starting and ending quotes
+        let cleanedCitation = citation.trim();
+        if (
+          (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
+          (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
+        ) {
+          cleanedCitation = cleanedCitation.slice(1, -1);
+        }
+
+        const trimmedCitation = cleanedCitation.trim().toLowerCase();
+        if (trimmedCitation) {
+          // Escape special regex characters and allow flexible whitespace matching
+          const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+
+          // Find matches case-insensitively in the original text (all occurrences)
+          const tempRegex = new RegExp(flexibleCitation, 'gi');
+          const matches = result.match(tempRegex);
+
+          if (matches) {
+            // Determine underline color based on importance
+            const importance = part.importance || 0;
+            let underlineColor = 'decoration-green-500'; // default for importance >= 3
+            if (importance === 1) {
+              underlineColor = 'decoration-red-500';
+            } else if (importance === 2) {
+              underlineColor = 'decoration-yellow-500';
+            }
+
+            // Replace all matches with colored underlined version
+            result = result.replace(
+              tempRegex,
+              `<u class="underline decoration-2 ${underlineColor}">$&</u>`
+            );
+          }
+        }
+      }
+    });
+
+    return result;
+  }
+
+  function highlightText(text: string | undefined, query: string, citation: string | null): string {
+    if (!text) return '';
+
+    // Start with underlined citations
+    let result = applyDefaultUnderlines(text);
+
     // Highlight hovered citation first (so it takes precedence)
     if (citation) {
       console.log('Highlighting citation:', citation);
-      const trimmedCitation = citation.trim().toLowerCase();
+      // Find the matching key part to get its importance
+      const matchingPart = keyParts.find((part) => part.citation === citation);
+      const importance = matchingPart?.importance || 0;
+
+      // Determine background color based on importance
+      let bgColor = 'bg-green-500'; // default for importance >= 3
+      if (importance === 1) {
+        bgColor = 'bg-red-500';
+      } else if (importance === 2) {
+        bgColor = 'bg-yellow-500';
+      }
+
+      // Remove starting and ending quotes
+      let cleanedCitation = citation.trim();
+      if (
+        (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
+        (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
+      ) {
+        cleanedCitation = cleanedCitation.slice(1, -1);
+      }
+
+      const trimmedCitation = cleanedCitation.trim().toLowerCase();
       if (trimmedCitation) {
         // Escape special regex characters and allow flexible whitespace matching
         const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
 
-        // Find only the first match case-insensitively in the original text
-        const tempRegex = new RegExp(flexibleCitation, 'i');
-        const match = result.match(tempRegex);
-        console.log('First match found:', match);
+        // Find matches case-insensitively in the original text (all occurrences)
+        const tempRegex = new RegExp(flexibleCitation, 'gi');
+        const matches = result.match(tempRegex);
+        console.log('Matches found:', matches);
 
-        if (match) {
-          // Replace only the first match with highlighted version
-          result = result.replace(tempRegex, '<mark class="bg-yellow-300 font-bold">$&</mark>');
+        if (matches) {
+          // Replace all matches with highlighted version using importance-based color
+          result = result.replace(tempRegex, `<mark class="${bgColor} text-white">$&</mark>`);
         }
       }
     }

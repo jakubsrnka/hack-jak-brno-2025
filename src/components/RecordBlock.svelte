@@ -18,7 +18,13 @@
 
 <div class="flex w-full flex-col md:flex-row gap-4">
   <div class="w-full md:w-[70%]">
-    <PatientRecordCard bind:hoveredCitation {patientRecord} {searchQuery} bind:isOpen />
+    <PatientRecordCard
+      bind:hoveredCitation
+      {patientRecord}
+      {searchQuery}
+      keyParts={patientRecord.keyParts as KeyPart[]}
+      bind:isOpen
+    />
   </div>
   {#if isOpen}
     <div class="w-full md:w-[30%]">
