@@ -31,7 +31,7 @@
 
 <div class="flex flex-col gap-6 pb-6">
   <!-- Header -->
-  <div class="flex items-center justify-between">
+  <div class="sticky top-0 z-50 bg-background py-6 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <Button
         variant="ghost"
