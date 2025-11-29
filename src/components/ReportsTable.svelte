@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
+  import { Check, ChevronsUpDown, Calendar, CalendarArrowUp } from 'lucide-svelte';
   import { type PatientsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
@@ -159,24 +159,13 @@
             onclick={() => onRowClick?.(item)}
             class="cursor-pointer hover:shadow-lg transition-shadow"
           >
-            <Card.Header>
-              <Card.Title class="mb-4">{getPatientName(item)}</Card.Title>
-              <div class="space-y-3">
-                {#if item.shortSummary}
-                  <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">
-                      Krátký popis
-                    </div>
-                    <div class="text-sm font-medium line-clamp-4">
-                      <!-- eslint-disable-next-line -->
-                      {@html item.shortSummary}
-                    </div>
-                  </div>
-                {/if}
+            <Card.Header class="flex flex-col h-full gap-4">
+              <Card.Title class="flex justify-between items-center gap-2 w-full"
+                >{getPatientName(item)}
                 {#if item.created}
                   <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">Vytvořeno</div>
-                    <div class="text-sm font-medium">
+                    <div class="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+                      <CalendarArrowUp class="size-4" />
                       {new Date(item.created).toLocaleDateString(getLocale(), {
                         year: 'numeric',
                         month: 'short',
@@ -185,7 +174,18 @@
                     </div>
                   </div>
                 {/if}
-              </div>
+              </Card.Title>
+              {#if item.shortSummary}
+                <div>
+                  <div class="text-xs font-semibold text-muted-foreground uppercase">
+                    Krátký popis
+                  </div>
+                  <div class="text-sm font-medium line-clamp-4">
+                    <!-- eslint-disable-next-line -->
+                    {@html item.shortSummary}
+                  </div>
+                </div>
+              {/if}
             </Card.Header>
           </Card.Root>
         {/if}

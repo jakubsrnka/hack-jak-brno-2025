@@ -15,7 +15,7 @@
 
   const data: Promise<PatientReportWithPatient[]> = pbClient
     .collection(Collections.PatientReports)
-    .getFullList<PatientReportWithPatient>({ expand: 'patient' });
+    .getFullList<PatientReportWithPatient>({ expand: 'patient', sort: '-created' });
 
   const patients: Promise<PatientsResponse[]> = pbClient
     .collection(Collections.Patients)
