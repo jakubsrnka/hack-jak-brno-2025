@@ -12,8 +12,8 @@ import {
 export const getPatientReport = async (
   id: string
 ): Promise<
-  PatientRecordsResponse<{
-    patientRecords_via_report: PatientRecordsResponse<KeyPart[]>;
+  PatientReportsResponse<{
+    patientRecords_via_report: PatientRecordsResponse<KeyPart[]>[];
   }>
 > =>
   pbClient.collection(Collections.PatientReports).getOne(id, {
