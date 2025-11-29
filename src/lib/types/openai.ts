@@ -1,7 +1,8 @@
 export type KeyPart = {
   importance: 1 | 2 | 3;
-  position: { start: number; end: number };
+  citation: string;
   reason: string;
+  type: string[];
 };
 
 export type Record = {
