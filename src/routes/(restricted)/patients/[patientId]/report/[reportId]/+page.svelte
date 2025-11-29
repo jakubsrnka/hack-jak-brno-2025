@@ -42,9 +42,9 @@
   });
 </script>
 
-<div class="flex gap-4 h-[calc(100vh-4rem)] relative">
+<div class="flex gap-4 relative">
   <div class="flex flex-col gap-4 w-full h-full">
-    <div class="flex flex-col md:flex-row gap-4 shrink-0">
+    <div class="flex flex-col md:flex-row gap-4 py-6 shrink-0 sticky z-10 top-0 bg-background">
       <div class="flex flex-col gap-2">
         <Label>Typ záznamu</Label>
         <Select.Root type="single">
@@ -68,7 +68,7 @@
         <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
       </div>
     </div>
-    <div class="flex flex-col overflow-y-auto gap-4 flex-1 min-h-0">
+    <div class="flex flex-col gap-4 flex-1">
       {#each filteredRecords as record, index (record.id)}
         <RecordBlock patientRecord={record} {searchQuery} />
       {/each}
