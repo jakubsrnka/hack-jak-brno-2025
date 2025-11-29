@@ -8,13 +8,14 @@
   import { Input } from '$components/ui/input';
   import { toast } from 'svelte-sonner';
   import { setDarkMode } from '$lib/stores/theme';
+  import { defaultSearchKeys, type SearchKey } from '$lib/constants/settingsDefaults';
   import XIcon from 'lucide-svelte/icons/x';
   import PlusIcon from 'lucide-svelte/icons/plus';
 
   // Define settings interface
   interface UserSettings {
     darkMode: boolean;
-    searchKeys: string[];
+    searchKeys: SearchKey[];
 
     [key: string]: unknown;
   }
@@ -23,7 +24,7 @@
     const userSettings = $currentUser?.settings as UserSettings | null;
     return {
       darkMode: userSettings?.darkMode ?? false,
-      searchKeys: userSettings?.searchKeys ?? []
+      searchKeys: userSettings?.searchKeys ?? [...defaultSearchKeys]
     };
   }
 
@@ -57,15 +58,20 @@
   }
 
   function addSearchKey() {
-    settings.searchKeys = [...settings.searchKeys, ''];
+    // Generate next available ID
+    const maxId = settings.searchKeys.length > 0
+      ? Math.max(...settings.searchKeys.map(sk => sk.id))
+      : 0;
+    const newId = maxId + 1;
+    settings.searchKeys = [...settings.searchKeys, { id: newId, key: '' }];
   }
 
   function removeSearchKey(index: number) {
     settings.searchKeys = settings.searchKeys.filter((_, i) => i !== index);
   }
 
-  function updateSearchKey(index: number, value: string) {
-    settings.searchKeys[index] = value;
+  function updateSearchKeyKey(index: number, key: string) {
+    settings.searchKeys[index].key = key;
   }
 </script>
 
@@ -103,13 +109,13 @@
             </div>
           {:else}
             <div class="space-y-2">
-              {#each settings.searchKeys as searchKey, index (index)}
+              {#each settings.searchKeys as searchKey, index (searchKey.id)}
                 <div class="flex items-center gap-2">
                   <Input
                     type="text"
                     placeholder="Zadejte vyhledávací klíč"
-                    value={searchKey}
-                    oninput={(e) => updateSearchKey(index, e.currentTarget.value)}
+                    value={searchKey.key}
+                    oninput={(e) => updateSearchKeyKey(index, e.currentTarget.value)}
                   />
                   <Button
                     variant="ghost"
