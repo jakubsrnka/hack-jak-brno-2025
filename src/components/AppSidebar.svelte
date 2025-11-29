@@ -8,6 +8,7 @@
   import { uploadDocumentDialogOpen } from '$lib/stores/dialog';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import CurrentUrlQRCode from '$components/CurrentUrlQRCode.svelte';
 
   const items = [
     {
@@ -107,6 +108,9 @@
         </Sidebar.Menu>
         <Sidebar.Footer>
           <Sidebar.Menu>
+            <Sidebar.MenuItem>
+              <CurrentUrlQRCode />
+            </Sidebar.MenuItem>
             <Sidebar.MenuItem>
               <Sidebar.MenuButton onclick={openUploadDialog}>
                 <div class="flex gap-1.5 items-center hover:cursor-pointer">
