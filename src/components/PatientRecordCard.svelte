@@ -35,7 +35,14 @@
     keyParts.forEach((part) => {
       let citations = part.citations;
       if (citations) {
-        const citationArray = Array.isArray(citations) ? citations : [citations];
+        const citationArray = Array.isArray(citations)
+          ? citations.flatMap((c) =>
+            String(c)
+              .split('...')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          )
+          : [citations];
 
         citationArray.forEach((citation) => {
           // Remove starting and ending quotes
@@ -114,7 +121,12 @@
       // Get all citations for this keypart
       const citationsToHighlight = matchingPart?.citations
         ? Array.isArray(matchingPart.citations)
-          ? matchingPart.citations
+          ? matchingPart.citations.flatMap((c) =>
+            String(c)
+              .split('...')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          )
           : [matchingPart.citations]
         : [citation];
 
