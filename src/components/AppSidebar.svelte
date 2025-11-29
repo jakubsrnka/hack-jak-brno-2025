@@ -77,7 +77,7 @@
       <Sidebar.Separator class="mb-2" />
       <Sidebar.GroupContent class="h-full justify-between flex flex-col">
         <Sidebar.Menu>
-          {#each items as item (item.title)}
+          {#each items as item, index (item.title)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton isActive={isActive(item.url)}>
                 {#snippet child({ props })}
@@ -87,25 +87,23 @@
                   </a>
                 {/snippet}
               </Sidebar.MenuButton>
+              {#if index === 1 && shouldShowSubMenu}
+                <Sidebar.MenuSub>
+                  {#each subMenuItems() as subItem}
+                    <Sidebar.MenuSubItem>
+                      <Sidebar.MenuSubButton isActive={isActive(subItem.url)}>
+                        {#snippet child({ props })}
+                          <a href={subItem.url} {...props}>
+                            {subItem.title}
+                          </a>
+                        {/snippet}
+                      </Sidebar.MenuSubButton>
+                    </Sidebar.MenuSubItem>
+                  {/each}
+                </Sidebar.MenuSub>
+              {/if}
             </Sidebar.MenuItem>
           {/each}
-          {#if shouldShowSubMenu}
-            <Sidebar.MenuItem>
-              <Sidebar.MenuSub>
-                {#each subMenuItems() as subItem}
-                  <Sidebar.MenuSubItem>
-                    <Sidebar.MenuSubButton isActive={isActive(subItem.url)}>
-                      {#snippet child({ props })}
-                        <a href={subItem.url} {...props}>
-                          {subItem.title}
-                        </a>
-                      {/snippet}
-                    </Sidebar.MenuSubButton>
-                  </Sidebar.MenuSubItem>
-                {/each}
-              </Sidebar.MenuSub>
-            </Sidebar.MenuItem>
-          {/if}
         </Sidebar.Menu>
         <Sidebar.Footer>
           <Sidebar.Menu>
