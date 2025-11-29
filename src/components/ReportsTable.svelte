@@ -61,7 +61,7 @@
   }
 
   function formatDateRange(): string {
-    if (!dateRange?.start) return 'Select dates...';
+    if (!dateRange?.start) return 'Vyberte datum...';
 
     const startDate = new Date(
       dateRange.start.year,
@@ -102,7 +102,7 @@
           >
             {selectedPatients.length > 0
               ? `${selectedPatients.length} selected`
-              : 'Select patients...'}
+              : 'Vyberte pacienta...'}
             <ChevronsUpDown class="ms-2 size-4 shrink-0 opacity-50" />
           </Button>
         </Popover.Trigger>
@@ -110,7 +110,7 @@
           <Command.Root>
             <Command.Input placeholder="Search patients..." />
             <Command.List>
-              <Command.Empty>No patients found.</Command.Empty>
+              <Command.Empty>Pacienti nebyli nalezeni.</Command.Empty>
               <Command.Group>
                 {#each patientsList as patient (patient.uuid)}
                   <Command.Item
@@ -165,7 +165,7 @@
                 {#if item.shortSummary}
                   <div>
                     <div class="text-xs font-semibold text-muted-foreground uppercase">
-                      Short summary
+                      Krátký popis
                     </div>
                     <div class="text-sm font-medium line-clamp-4">
                       <!-- eslint-disable-next-line -->
@@ -175,7 +175,7 @@
                 {/if}
                 {#if item.created}
                   <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">Created</div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">Vytvořeno</div>
                     <div class="text-sm font-medium">
                       {new Date(item.created).toLocaleDateString(getLocale(), {
                         year: 'numeric',
