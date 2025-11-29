@@ -115,9 +115,10 @@ export const updateUserSettings = async (settings: Record<string, unknown>) => {
   });
 };
 
-export const setReportSummary = async (reportId: string, summary: string) => {
+export const setReportSummary = async (reportId: string, summary: string, shortSummary: string) => {
   return await pbClient.collection(Collections.PatientReports).update(reportId, {
-    summary
+    summary,
+    shortSummary
   });
 };
 

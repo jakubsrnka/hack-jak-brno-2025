@@ -12,6 +12,7 @@ export type RecordAIData = {
 };
 
 export type AIResponse = {
+  shortSummary: string;
   summary: string;
   records: RecordAIData[];
 };

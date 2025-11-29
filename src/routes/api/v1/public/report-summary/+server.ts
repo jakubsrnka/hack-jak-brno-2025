@@ -72,7 +72,12 @@ ${record.text}
           format: {
             type: 'json_schema',
             name: 'record',
-            schema: JSON.parse(recordSchema.replace('"__AVAILABLE_KEYPART_TYPES__"', wantedKeyParts.map((k) => `"${k}"`).join(', ')))
+            schema: JSON.parse(
+              recordSchema.replace(
+                '"__AVAILABLE_KEYPART_TYPES__"',
+                wantedKeyParts.map((k) => `"${k}"`).join(', ')
+              )
+            )
           }
         }
       });

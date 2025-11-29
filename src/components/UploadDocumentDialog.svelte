@@ -87,8 +87,8 @@
       throw new Error('Network response was not ok');
     }
 
-    const responseData = await response.json() as AIResponse;
-    await setReportSummary(report.id, responseData.summary);
+    const responseData = (await response.json()) as AIResponse;
+    await setReportSummary(report.id, responseData.summary, responseData.shortSummary);
     await batchSetRecordsAIData(responseData.records);
     return { patient, report };
   }

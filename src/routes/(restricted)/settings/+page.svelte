@@ -59,9 +59,8 @@
 
   function addSearchKey() {
     // Generate next available ID
-    const maxId = settings.searchKeys.length > 0
-      ? Math.max(...settings.searchKeys.map(sk => sk.id))
-      : 0;
+    const maxId =
+      settings.searchKeys.length > 0 ? Math.max(...settings.searchKeys.map((sk) => sk.id)) : 0;
     const newId = maxId + 1;
     settings.searchKeys = [...settings.searchKeys, { id: newId, key: '' }];
   }
