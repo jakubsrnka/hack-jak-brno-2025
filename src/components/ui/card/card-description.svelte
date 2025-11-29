@@ -6,6 +6,7 @@
     ref = $bindable(null),
     class: className,
     children,
+    title,
     ...restProps
   }: WithElementRef<HTMLAttributes<HTMLParagraphElement>> = $props();
 </script>
@@ -13,7 +14,8 @@
 <p
   bind:this={ref}
   data-slot="card-description"
-  class={cn('text-muted-foreground text-sm', className)}
+  class={cn('text-muted-foreground text-sm w-full overflow-hidden text-ellipsis', className)}
+  {title}
   {...restProps}
 >
   {@render children?.()}

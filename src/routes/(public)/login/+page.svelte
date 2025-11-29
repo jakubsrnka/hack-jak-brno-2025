@@ -10,6 +10,7 @@
   import { Collections } from '$types/pocketbase';
   import type { AuthRecord } from 'pocketbase';
   import Arrow from '$components/Arrow.svelte';
+  import { page } from '$app/state';
 
   const handleLogin = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -24,7 +25,8 @@
       if (record) {
         currentUser.set(record as AuthRecord);
         toast.success(m.login_successfulLogin());
-        goto('/');
+        const redirectUrl = page.url.searchParams.get('redirect') || '/';
+        goto(redirectUrl);
       }
     } catch {
       toast.error(m.login_wrongCredentials());
@@ -44,7 +46,11 @@
     <form class="flex flex-col gap-4" onsubmit={handleLogin}>
       <Card.Content class="grid gap-4">
         <div class="grid grid-cols-1 gap-6">
-          <Button variant="outline" class="h-16" onclick={() => defaultLogin()}>
+          <Button
+            variant="outline"
+            class="h-16"
+            onclick={() => defaultLogin(page.url.searchParams.get('redirect') || '/')}
+          >
             <img src="/indentita-obcana-logo.png" alt="Indentita Obcana Logo" class="h-8 w-auto" />
             {m.login_citizenPortal()}
           </Button>
