@@ -10,6 +10,7 @@
   import { cn } from '$lib/utils';
   import { getLocale } from '$lib/paraglide/runtime';
   import type { DateRange } from 'bits-ui';
+  import { m } from '$lib/paraglide/messages';
 
   interface Props {
     data: any[];
@@ -61,7 +62,7 @@
   }
 
   function formatDateRange(): string {
-    if (!dateRange?.start) return 'Select dates...';
+    if (!dateRange?.start) return m.reports_selectDates();
 
     const startDate = new Date(
       dateRange.start.year,
@@ -102,15 +103,15 @@
           >
             {selectedPatients.length > 0
               ? `${selectedPatients.length} selected`
-              : 'Select patients...'}
+              : m.reports_selectPatients()}
             <ChevronsUpDown class="ms-2 size-4 shrink-0 opacity-50" />
           </Button>
         </Popover.Trigger>
         <Popover.Content class="w-[200px] p-0">
           <Command.Root>
-            <Command.Input placeholder="Search patients..." />
+            <Command.Input placeholder={m.reports_searchPatients()} />
             <Command.List>
-              <Command.Empty>No patients found.</Command.Empty>
+              <Command.Empty>{m.reports_noPatientsFound()}</Command.Empty>
               <Command.Group>
                 {#each patientsList as patient (patient.uuid)}
                   <Command.Item
@@ -150,7 +151,7 @@
 
   <!-- Reports Grid -->
   {#if data.length === 0}
-    <div class="text-center py-12 text-muted-foreground">No results.</div>
+    <div class="text-center py-12 text-muted-foreground">{m.reports_noResults()}</div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {#each data as item, idx (idx)}
@@ -165,7 +166,7 @@
                 {#if item.shortSummary}
                   <div>
                     <div class="text-xs font-semibold text-muted-foreground uppercase">
-                      Short summary
+                      {m.reports_shortSummary()}
                     </div>
                     <div class="text-sm font-medium line-clamp-4">
                       <!-- eslint-disable-next-line -->
@@ -175,7 +176,9 @@
                 {/if}
                 {#if item.created}
                   <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">Created</div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">
+                      {m.reports_created()}
+                    </div>
                     <div class="text-sm font-medium">
                       {new Date(item.created).toLocaleDateString(getLocale(), {
                         year: 'numeric',
