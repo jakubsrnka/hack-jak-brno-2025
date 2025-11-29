@@ -57,11 +57,6 @@
       return;
     }
 
-    const selectedOptions = Object.entries(checkboxes)
-      .filter(([, checked]) => checked)
-      .map(([key]) => key);
-    console.log('Selected options:', selectedOptions);
-
     isLoading = true;
 
     const reader = new FileReader();
@@ -75,6 +70,12 @@
         const report = await createEmptyReport(patient.id);
         const records = extractDocumentationRecords(data, patient.id);
         await createRecords(report.id, records);
+
+        // We send labels to the model
+        const selectedLabels: string[] = searchKeys
+          .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
+          .map((searchKey) => searchKey.key);
+        console.log('Selected checkbox labels:', selectedLabels);
 
         resetForm();
         open = false;
