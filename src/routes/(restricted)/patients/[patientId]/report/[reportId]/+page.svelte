@@ -1,21 +1,23 @@
 <script lang="ts">
   import * as Select from '$components/ui/select/index.js';
-  import type { PatientRecordsResponse } from '$types/pocketbase';
+  import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
   import { onMount } from 'svelte';
-  import { getPatientRecords } from '$lib/services';
+  import { getPatientRecords, getPatientReport } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
   import Label from '$components/ui/label/label.svelte';
   import { Button } from '$components/ui/button';
   import { goto } from '$app/navigation';
   import ClockIcon from 'lucide-svelte/icons/clock';
   import { browser } from '$app/environment';
+  import BigSummary from '$components/BigSummary.svelte';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
   let searchQuery = $state<string>('');
   let patientRecords: PatientRecordsResponse[] = $state([]);
+  let patientReport: PatientReportsResponse | null = $state(null);
 
   const uniqueRecordTypes = $derived(
     [...new Set(patientRecords.map((record) => record.type))].sort()
@@ -42,6 +44,7 @@
   onMount(async () => {
     if (reportId) {
       patientRecords = await getPatientRecords(reportId);
+      patientReport = await getPatientReport(reportId);
 
       if (browser && window.location.hash) {
         const recordId = window.location.hash.substring(1);
@@ -92,6 +95,7 @@
         </Button>
       </div>
     </div>
+    <BigSummary text={patientReport?.summary ?? ''} />
     <div class="flex flex-col gap-4 flex-1">
       {#each filteredRecords as record (record.id)}
         <div id={record.id}>
