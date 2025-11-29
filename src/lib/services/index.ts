@@ -17,7 +17,8 @@ export const getPatientReport = async (
   }>
 > =>
   pbClient.collection(Collections.PatientReports).getOne(id, {
-    expand: 'patientRecords_via_report'
+    expand: 'patientRecords_via_report',
+    requestKey: null
   });
 
 export const getPatientsByDoctor = async (doctorIds: string[]): Promise<PatientsResponse[]> => {
@@ -72,10 +73,11 @@ export const insertPatient = async (patientId: string): Promise<PatientsResponse
   return created as PatientsResponse;
 };
 
-export const createEmptyReport = async (patientId: string) => {
+export const createEmptyReport = async (patientId: string, keywords: string[]) => {
   const collection = pbClient.collection(Collections.PatientReports);
   const created = await collection.create({
-    patient: patientId
+    patient: patientId,
+    keywords
   });
   return created as PatientReportsResponse;
 };
@@ -122,21 +124,37 @@ export const setReportSummary = async (reportId: string, summary: string, shortS
   });
 };
 
-export const batchSetRecordsAIData = async (records: RecordAIData[]) => {
+export const fetchRecordAIData = async (
+  recordId: string,
+  wantedKeyParts: string[]
+): Promise<RecordAIData> => {
+  const record = await pbClient
+    .collection(Collections.PatientRecords)
+    .getOne<PatientRecordsResponse>(recordId, { requestKey: null });
+
+  const response = await fetch('/api/v1/public/record-summary', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      record,
+      wantedKeyParts
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch record AI data');
+  }
+
+  return (await response.json()) as RecordAIData;
+};
+
+export const setRecordAIData = async (recordId: string, data: RecordAIData) => {
   const collection = pbClient.collection(Collections.PatientRecords);
 
-  const updatedRecords = await Promise.all(
-    records.map((record) =>
-      collection.update(
-        record.id,
-        {
-          summary: record.summary,
-          keyParts: record.keyParts
-        },
-        { requestKey: null }
-      )
-    )
-  );
-
-  return updatedRecords as PatientRecordsResponse[];
+  return await collection.update(recordId, {
+    summary: data.summary,
+    keyParts: data.keyParts
+  });
 };

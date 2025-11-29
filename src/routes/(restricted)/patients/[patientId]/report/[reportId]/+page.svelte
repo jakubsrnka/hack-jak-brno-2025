@@ -99,7 +99,7 @@
     <div class="flex flex-col gap-4 flex-1">
       {#each filteredRecords as record (record.id)}
         <div id={record.id}>
-          <RecordBlock patientRecord={record} {searchQuery} />
+          <RecordBlock patientRecord={record} {searchQuery} {reportId} />
         </div>
       {/each}
     </div>

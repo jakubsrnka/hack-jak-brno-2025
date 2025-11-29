@@ -5,7 +5,7 @@
   import { Input } from '$components/ui/input';
   import { Spinner } from '$components/ui/spinner';
   import { defaultSearchKeys, type SearchKey } from '$lib/constants/settingsDefaults';
-  import { currentUser } from '$lib/pocketbase';
+  import { currentUser, pbClient } from '$lib/pocketbase';
   import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
   import {
@@ -13,7 +13,6 @@
     extractPatientIdFromData
   } from '$lib/helpers/xmlDocumentationToPBType';
   import {
-    batchSetRecordsAIData,
     createEmptyReport,
     createRecords,
     getPatientReport,
@@ -23,7 +22,7 @@
   import * as Dialog from '$components/ui/dialog';
   import { goto } from '$app/navigation';
   import { SvelteMap } from 'svelte/reactivity';
-  import type { AIResponse } from '$types/openai';
+  import type { ReportSummaryResponse } from '$types/openai';
 
   type Props = {
     open?: boolean;
@@ -63,15 +62,16 @@
     const data = convertXML(xmlContent) as XmlDocumentation;
     const patientId = extractPatientIdFromData(data);
     const patient = await insertPatient(patientId);
-    const report = await createEmptyReport(patient.id);
-    const records = extractDocumentationRecords(data, patient.id);
-    await createRecords(report.id, records);
 
     // We send labels to the model
     const selectedLabels: string[] = searchKeys
       .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
       .map((searchKey) => searchKey.key);
     console.log('Selected checkbox labels:', selectedLabels);
+
+    const report = await createEmptyReport(patient.id, selectedLabels);
+    const records = extractDocumentationRecords(data, patient.id);
+    await createRecords(report.id, records);
 
     const fullReport = await getPatientReport(report.id);
 
@@ -87,9 +87,9 @@
       throw new Error('Network response was not ok');
     }
 
-    const responseData = (await response.json()) as AIResponse;
+    const responseData = (await response.json()) as ReportSummaryResponse;
     await setReportSummary(report.id, responseData.summary, responseData.shortSummary);
-    await batchSetRecordsAIData(responseData.records);
+
     return { patient, report };
   }
 
