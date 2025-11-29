@@ -1,4 +1,16 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "hello_world": "Hello, {name} from cs!"
+  "error_back": "Zpět",
+  "error_error": "Chyba",
+  "login_citizenPortal": "Identita Občana",
+  "login_createAccountButton": "Přihlásit se",
+  "login_email": "E-mail",
+  "login_enterEmail": "Přihlašte se pomocí Identity Občana",
+  "login_exampleEmail": "priklad@gmail.com",
+  "login_loginVia": "Přihlásit",
+  "login_orContinueWith": "Nebo pokračujte s",
+  "login_password": "Heslo",
+  "login_successfulLogin": "Úspěšné přihlášení!",
+  "login_wrongCredentials": "Špatné přihlašovací údaje",
+  "sidepanel_logout": "Odhlášení"
 }
