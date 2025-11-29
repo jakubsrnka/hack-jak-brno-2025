@@ -2,10 +2,11 @@ import { json } from '@sveltejs/kit';
 import { OPENAI_API_KEY } from '$env/static/private';
 import OpenAI from 'openai';
 import reportSchema from '$lib/server/openai/report-schema.json';
-import prompt from '$lib/server/openai/prompt.txt';
+import recordSchema from '$lib/server/openai/record-schema.json?raw';
+import reportPrompt from '$lib/server/openai/prompt-report.txt';
+import recordPrompt from '$lib/server/openai/prompt-record.txt';
 import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
 import type { KeyPart } from '$types/openai';
-import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions.js';
 
 const friend = new OpenAI({
   apiKey: OPENAI_API_KEY
@@ -22,36 +23,24 @@ const WORDS_PER_KEYPART = 50;
 // reason: stručné zdůvodnění, proč je to důležité
 
 type RequestBody = {
-  record: PatientReportsResponse<{
+  report: PatientReportsResponse<{
     patientRecords_via_report: PatientRecordsResponse<KeyPart[]>[];
   }>;
   wantedKeyParts: string[];
 };
 
-export const GET = async ({ request }) => {
+export const POST = async ({ request }) => {
   const body = (await request.json()) as RequestBody;
 
-  const { record, wantedKeyParts } = body;
-
-  // Calculate maxKeyParts for each record based on text length
-  record.expand.patientRecords_via_report.map((r) => {
-    console.log(`Record ID: ${r.id}, Text length: ${r.text.split(' ').length} words`);
-    return {
-      ...r,
-      maxKeyParts: Math.min(
-        Math.floor(r.text.split(' ').length / WORDS_PER_KEYPART),
-        wantedKeyParts.length
-      )
-    };
-  });
+  const { report, wantedKeyParts } = body;
 
   const response = await friend.responses.create({
     model: 'gpt-5.1',
-    input: `${prompt}
+    input: `${reportPrompt}
 
-${wantedKeyParts.map((keyPart) => REPORT_SUMMARY_OPTIONS.find((option) => option.id === keyPart)?.label).join(', ')}
+${wantedKeyParts.join(', ')}
 
-${JSON.stringify(record)}
+${JSON.stringify(report)}
 `,
     text: {
       format: {
@@ -62,5 +51,38 @@ ${JSON.stringify(record)}
     }
   });
 
-  return json(JSON.parse(response.output_text));
+  const recordResponses = await Promise.all(
+    report.expand.patientRecords_via_report.map(async (record) => {
+      const recordResponse = await friend.responses.create({
+        model: 'gpt-5.1',
+        input: `${recordPrompt}
+
+${wantedKeyParts.join(', ')}
+Max key parts: ${Math.floor(record.text.split(' ').length / WORDS_PER_KEYPART)}
+
+Contents:
+\`\`\`
+${record.text}
+\`\`\`
+`,
+        text: {
+          format: {
+            type: 'json_schema',
+            name: 'record',
+            schema: JSON.parse(recordSchema.replace('"__AVAILABLE_KEYPART_TYPES__"', wantedKeyParts.map((k) => `"${k}"`).join(', ')))
+          }
+        }
+      });
+
+      return {
+        id: record.id,
+        ...JSON.parse(recordResponse.output_text)
+      };
+    })
+  );
+
+  return json({
+    ...JSON.parse(response.output_text),
+    records: recordResponses
+  });
 };
