@@ -12,10 +12,18 @@
     extractDocumentationRecords,
     extractPatientIdFromData
   } from '$lib/helpers/xmlDocumentationToPBType';
-  import { createEmptyReport, createRecords, insertPatient } from '$lib/services';
+  import {
+    batchSetRecordsAIData,
+    createEmptyReport,
+    createRecords,
+    getPatientReport,
+    insertPatient,
+    setReportSummary
+  } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
   import { goto } from '$app/navigation';
   import { SvelteMap } from 'svelte/reactivity';
+  import type { AIResponse } from '$types/openai';
 
   type Props = {
     open?: boolean;
@@ -51,6 +59,40 @@
     checkboxOverrides.set(keyId, value);
   }
 
+  async function handleStoreXmlData(xmlContent: string) {
+    const data = convertXML(xmlContent) as XmlDocumentation;
+    const patientId = extractPatientIdFromData(data);
+    const patient = await insertPatient(patientId);
+    const report = await createEmptyReport(patient.id);
+    const records = extractDocumentationRecords(data, patient.id);
+    await createRecords(report.id, records);
+
+    // We send labels to the model
+    const selectedLabels: string[] = searchKeys
+      .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
+      .map((searchKey) => searchKey.key);
+    console.log('Selected checkbox labels:', selectedLabels);
+
+    const fullReport = await getPatientReport(report.id);
+
+    const response = await fetch('/api/v1/public/report-summary', {
+      method: 'POST',
+      body: JSON.stringify({
+        report: fullReport,
+        wantedKeyParts: selectedLabels
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const responseData = await response.json() as AIResponse;
+    await setReportSummary(report.id, responseData.summary);
+    await batchSetRecordsAIData(responseData.records);
+    return { patient, report };
+  }
+
   function handleSubmit() {
     if (!selectedFile || selectedFile.length === 0) {
       alert('Prosím, nahrajte XML dokument.');
@@ -64,19 +106,7 @@
     reader.onload = async () => {
       try {
         const xmlContent = reader.result as string;
-        const data = convertXML(xmlContent) as XmlDocumentation;
-        const patientId = extractPatientIdFromData(data);
-        const patient = await insertPatient(patientId);
-        const report = await createEmptyReport(patient.id);
-        const records = extractDocumentationRecords(data, patient.id);
-        await createRecords(report.id, records);
-
-        // We send labels to the model
-        const selectedLabels: string[] = searchKeys
-          .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
-          .map((searchKey) => searchKey.key);
-        console.log('Selected checkbox labels:', selectedLabels);
-
+        const { patient, report } = await handleStoreXmlData(xmlContent);
         resetForm();
         open = false;
         await goto('/patients/' + patient.id + '/report/' + report.id);
