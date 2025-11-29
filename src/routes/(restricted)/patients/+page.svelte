@@ -6,6 +6,7 @@
   import { currentUser } from '$lib/pocketbase';
   import { Skeleton } from '$components/ui/skeleton/index.js';
   import * as Card from '$components/ui/card/index.js';
+  import { subMenuStore } from '$lib/stores';
 
   let patients: PatientsResponse[] = $state([]);
   let loading = $state(true);
@@ -14,6 +15,14 @@
     if ($currentUser) {
       const startTime = Date.now();
       patients = await getPatientsByDoctor([$currentUser.id]);
+      subMenuStore.set(
+        patients
+          .map((patient) => ({
+            title: patient.uuid,
+            url: `/patients/${patient.id}`
+          }))
+          .sort((a, b) => a.title.localeCompare(b.title))
+      );
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 300 - elapsed);
       await new Promise((resolve) => setTimeout(resolve, remaining));

@@ -9,6 +9,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import CurrentUrlQRCode from '$components/CurrentUrlQRCode.svelte';
+  import { subMenuStore } from '$lib/stores';
 
   const items = [
     {
@@ -36,35 +37,17 @@
     return page.url.pathname === url;
   }
 
-  const isOnReportPage = $derived(
-    page.url.pathname.match(/^\/patients\/[^/]+\/report\/[^/]+$/) !== null
-  );
+  const WITH_SUBMENU_PAGES = ['/patients'];
 
-  const isOnPatientPage = $derived(page.url.pathname.match(/^\/patients\/[^/]+$/) !== null);
+  const hasSubMenu = (path: string): boolean => {
+    return WITH_SUBMENU_PAGES.some((p) => path.startsWith(p));
+  };
 
-  const shouldShowSubMenu = $derived(isOnReportPage || isOnPatientPage);
-
-  const subMenuItems = $derived(() => {
-    const pathParts = page.url.pathname.split('/').filter(Boolean);
-    let backUrl = pathParts.length > 1 ? '/' + pathParts.slice(0, -1).join('/') : '/';
-
-    // If going back one level would land on /report, go back two levels instead
-    if (backUrl.endsWith('/report')) {
-      backUrl = pathParts.length > 2 ? '/' + pathParts.slice(0, -2).join('/') : '/';
+  $effect(() => {
+    // Clear submenu if not on a page (or subpage) that requires it
+    if (!hasSubMenu(page.url.pathname)) {
+      subMenuStore.set([]);
     }
-
-    if (isOnReportPage) {
-      return [
-        { title: 'Zpět', url: backUrl },
-        { title: 'Aktuální zpráva', url: page.url.pathname }
-      ];
-    } else if (isOnPatientPage) {
-      return [
-        { title: 'Zpět', url: backUrl },
-        { title: 'Zprávy pacienta', url: page.url.pathname }
-      ];
-    }
-    return [];
   });
 </script>
 
@@ -78,7 +61,7 @@
       <Sidebar.Separator class="mb-2" />
       <Sidebar.GroupContent class="h-full justify-between flex flex-col">
         <Sidebar.Menu>
-          {#each items as item, index (item.title)}
+          {#each items as item (item.title)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton isActive={isActive(item.url)}>
                 {#snippet child({ props })}
@@ -88,16 +71,12 @@
                   </a>
                 {/snippet}
               </Sidebar.MenuButton>
-              {#if index === 1 && shouldShowSubMenu}
+              {#if hasSubMenu(item.url) && $subMenuStore.length > 0}
                 <Sidebar.MenuSub>
-                  {#each subMenuItems() as subItem}
+                  {#each $subMenuStore as subItem}
                     <Sidebar.MenuSubItem>
-                      <Sidebar.MenuSubButton isActive={isActive(subItem.url)}>
-                        {#snippet child({ props })}
-                          <a href={subItem.url} {...props}>
-                            {subItem.title}
-                          </a>
-                        {/snippet}
+                      <Sidebar.MenuSubButton isActive={isActive(subItem.url)} href={subItem.url}>
+                        {subItem.title}
                       </Sidebar.MenuSubButton>
                     </Sidebar.MenuSubItem>
                   {/each}
