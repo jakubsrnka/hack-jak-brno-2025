@@ -3,8 +3,8 @@ import { OPENAI_API_KEY } from '$env/static/private';
 import OpenAI from 'openai';
 import reportSchema from '$lib/server/openai/report-schema.json';
 import recordSchema from '$lib/server/openai/record-schema.json?raw';
-import reportPrompt from '$lib/server/openai/prompt-report.txt';
-import recordPrompt from '$lib/server/openai/prompt-record.txt';
+import reportPrompt from '$lib/server/openai/prompt-report.txt?raw';
+import recordPrompt from '$lib/server/openai/prompt-record.txt?raw';
 import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
 import type { KeyPart } from '$types/openai';
 
