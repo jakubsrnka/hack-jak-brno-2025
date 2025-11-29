@@ -4,8 +4,11 @@
   "properties": {
     "summary": {
       "type": "string"
+    },
+    "shortSummary": {
+      "type": "string"
     }
   },
-  "required": ["summary"],
+  "required": ["summary", "shortSummary"],
   "type": "object"
 }

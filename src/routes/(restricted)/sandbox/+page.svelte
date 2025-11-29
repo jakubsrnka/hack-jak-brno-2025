@@ -4,7 +4,12 @@
   import { pbClient } from '$lib/pocketbase';
   import { getPatientReport } from '$lib/services';
   import type { KeyPart } from '$types/openai';
-  import { Collections, type PatientsRecord } from '$types/pocketbase';
+  import {
+    Collections,
+    type PatientReportsRecord,
+    type PatientsRecord,
+    type PatientsResponse
+  } from '$types/pocketbase';
 
   let buttonText = $state('Send to AI');
 
@@ -40,6 +45,7 @@
 
       type AIResponse = {
         summary: string;
+        shortSummary: string;
         records: {
           id: string;
           summary: string;
@@ -49,9 +55,12 @@
 
       const data: AIResponse = await response.json();
 
-      // pbClient.collection(Collections.PatientRecords).update<PatientsRecord>('sgqx2g5zu70ayj8', {
-      //   summary: data.summary
-      // });
+      // pbClient
+      //   .collection(Collections.PatientReports)
+      //   .update<PatientReportsRecord>('sgqx2g5zu70ayj8', {
+      //     summary: data.summary,
+      //     shortSummary: data.shortSummary
+      //   });
 
       // data.records.forEach(async (record) => {
       //   await pbClient.collection(Collections.PatientRecords).update(record.id, {
@@ -84,10 +93,10 @@
   <Button onclick={handleClick}>{buttonText}</Button>
   <div class="max-w-full mt-4 overflow-x-auto">
     {#if output}
-      <h2 class="mt-6 mb-2 text-xl font-semibold">Input:</h2>
-      <pre>{input}</pre>
       <h2 class="mt-6 mb-2 text-xl font-semibold">Output:</h2>
       <pre>{output}</pre>
+      <h2 class="mt-6 mb-2 text-xl font-semibold">Input:</h2>
+      <pre>{input}</pre>
     {:else if loading}
       <Skeleton class="h-96 w-full mt-4" />
     {/if}

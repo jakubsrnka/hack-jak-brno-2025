@@ -1,18 +1,18 @@
 export type KeyPart = {
   importance: 1 | 2 | 3;
-  citation: string;
+  citations: string[];
   reason: string;
-  type: string[];
+  types: string[];
 };
 
-export type Record = {
+export type RecordAIData = {
   id: string;
   summary: string; // eventually remove if is not reliable
   keyParts: KeyPart[];
 };
 
-export type Report = {
-  id: string;
+export type AIResponse = {
+  shortSummary: string;
   summary: string;
-  records: Record[];
+  records: RecordAIData[];
 };

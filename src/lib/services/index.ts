@@ -1,5 +1,5 @@
 import { pbClient } from '$lib/pocketbase';
-import type { KeyPart } from '$types/openai';
+import type { KeyPart, RecordAIData } from '$types/openai';
 import {
   Collections,
   type CreateBase,
@@ -113,4 +113,30 @@ export const updateUserSettings = async (settings: Record<string, unknown>) => {
   return await pbClient.collection(Collections.Users).update(currentUserId, {
     settings
   });
+};
+
+export const setReportSummary = async (reportId: string, summary: string, shortSummary: string) => {
+  return await pbClient.collection(Collections.PatientReports).update(reportId, {
+    summary,
+    shortSummary
+  });
+};
+
+export const batchSetRecordsAIData = async (records: RecordAIData[]) => {
+  const collection = pbClient.collection(Collections.PatientRecords);
+
+  const updatedRecords = await Promise.all(
+    records.map((record) =>
+      collection.update(
+        record.id,
+        {
+          summary: record.summary,
+          keyParts: record.keyParts
+        },
+        { requestKey: null }
+      )
+    )
+  );
+
+  return updatedRecords as PatientRecordsResponse[];
 };
