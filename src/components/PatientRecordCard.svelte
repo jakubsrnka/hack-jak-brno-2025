@@ -2,7 +2,7 @@
   import type { PatientRecordsRecord } from '$types/pocketbase';
   import * as Card from '$components/ui/card/index.js';
   import * as Accordion from '$components/ui/accordion/index.js';
-  import { formatDateTime } from '$lib/utils';
+  import { formatDate } from '$lib/utils';
   import type { KeyPart } from '$types/openai';
   import { Badge } from '$components/ui/badge/index.js';
 
@@ -192,8 +192,8 @@
     <Card.Root class="gap-2 transition-shadow">
       <Card.Header class="relative gap-1">
         <Card.Title class="flex flex-col gap-2">
-          <span>{formatDateTime(patientRecord.date)}</span>
-          <span>{patientRecord.type}</span>
+          <span>Datum: {formatDate(patientRecord.date)}</span>
+          <span>Typ: {patientRecord.type}</span>
         </Card.Title>
         <Accordion.Trigger class="hidden md:flex p-0 gap-1 absolute right-5 top-0.5 cursor-pointer">
           {#if isOpen}

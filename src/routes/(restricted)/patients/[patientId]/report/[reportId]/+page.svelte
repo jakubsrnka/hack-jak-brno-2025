@@ -1,17 +1,19 @@
 <script lang="ts">
   import * as Select from '$components/ui/select/index.js';
-  import type { PatientRecordsResponse } from '$types/pocketbase';
+  import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
   import { onMount } from 'svelte';
-  import { getPatientRecords } from '$lib/services';
+  import { getPatientRecords, getPatientReport } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
   import Label from '$components/ui/label/label.svelte';
+  import BigSummary from '$components/BigSummary.svelte';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
   let searchQuery = $state<string>('');
   let patientRecords: PatientRecordsResponse[] = $state([]);
+  let patientReport: PatientReportsResponse | null = $state(null);
 
   const uniqueRecordTypes = $derived(
     [...new Set(patientRecords.map((record) => record.type))].sort()
@@ -38,6 +40,7 @@
   onMount(async () => {
     if (reportId) {
       patientRecords = await getPatientRecords(reportId);
+      patientReport = await getPatientReport(reportId);
     }
   });
 </script>
@@ -68,8 +71,9 @@
         <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
       </div>
     </div>
+    <BigSummary text={patientReport?.summary ?? ''} />
     <div class="flex flex-col gap-4 flex-1">
-      {#each filteredRecords as record, index (record.id)}
+      {#each filteredRecords as record, i (record.id)}
         <RecordBlock patientRecord={record} {searchQuery} />
       {/each}
     </div>
