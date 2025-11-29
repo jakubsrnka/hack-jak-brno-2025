@@ -21,7 +21,14 @@
 
       const response = await fetch('/api/v1/public/report-summary', {
         method: 'POST',
-        body: JSON.stringify({ report, wantedKeyParts: ['diagnoseDate', 'tnmClassification'] })
+        body: JSON.stringify({
+          report,
+          wantedKeyParts: [
+            'Datum stanovení diagnózy',
+            'Klinická a patologická TNM klasifikace',
+            'Léčba mimo MOÚ'
+          ]
+        })
       });
 
       if (!response.ok) {
