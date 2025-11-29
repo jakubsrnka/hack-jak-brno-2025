@@ -4,7 +4,6 @@ import { redirect } from '@sveltejs/kit';
 import { get } from 'svelte/store';
 
 export const load = async () => {
-  console.log(get(currentUser));
   if (!isLoggedIn()) throw redirect(303, '/login');
 
   if (pbClient.authStore.isValid) {

@@ -1,68 +1,43 @@
-<script lang="ts" generics="TData, TValue">
-  import {
-    type ColumnDef,
-    type SortingState,
-    type ColumnFiltersState,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel
-  } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$components/ui/data-table';
-  import * as Table from '$components/ui/table';
-  import { ArrowDownAZ, ArrowUpZA, Check, ChevronsUpDown } from 'lucide-svelte';
+<script lang="ts">
+  import { Check, ChevronsUpDown } from 'lucide-svelte';
   import { type PatientsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
   import * as Command from '$components/ui/command';
   import { Button } from '$components/ui/button';
+  import * as Card from '$components/ui/card';
   import { cn } from '$lib/utils';
+  import { getLocale } from '$lib/paraglide/runtime';
 
-  type DataTableProps<TData, TValue> = {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    onRowClick?: (row: TData) => void;
+  interface Props {
+    data: any[];
+    onRowClick?: (row: any) => void;
     patients: Promise<PatientsResponse[]>;
-  };
+  }
 
-  let { data, columns, onRowClick, patients }: DataTableProps<TData, TValue> = $props();
-
-  let sorting = $state<SortingState>([]);
-  let columnFilters = $state<ColumnFiltersState>([]);
-
-  const table = createSvelteTable({
-    get data() {
-      return data;
-    },
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: (updater) => {
-      if (typeof updater === 'function') {
-        sorting = updater(sorting);
-      } else {
-        sorting = updater;
-      }
-    },
-    onColumnFiltersChange: (updater) => {
-      if (typeof updater === 'function') {
-        columnFilters = updater(columnFilters);
-      } else {
-        columnFilters = updater;
-      }
-    },
-    state: {
-      get sorting() {
-        return sorting;
-      },
-      get columnFilters() {
-        return columnFilters;
-      }
-    }
-  });
+  let { data, onRowClick, patients }: Props = $props();
 
   let selectedPatients = $state<string[]>([]);
-  let open = $state(false);
+  let isOpen = $state(false);
+
+  function getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((current, prop) => current?.[prop], obj);
+  }
+
+  function getPatientName(item: any): string {
+    return getNestedValue(item, 'expand.patient.uuid') || 'Unknown Patient';
+  }
+
+  function togglePatientSelection(patientUuid: string) {
+    selectedPatients = selectedPatients.includes(patientUuid)
+      ? selectedPatients.filter((uuid) => uuid !== patientUuid)
+      : [...selectedPatients, patientUuid];
+  }
+
+  function isPatientVisible(item: any): boolean {
+    const patientUuid = getNestedValue(item, 'expand.patient.uuid');
+    return selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
+  }
 </script>
 
 <div class="space-y-4">
@@ -70,13 +45,13 @@
     {#await patients}
       <Skeleton class="h-10 w-[200px]" />
     {:then patientsList}
-      <Popover.Root bind:open>
+      <Popover.Root bind:open={isOpen}>
         <Popover.Trigger>
           <Button
             variant="outline"
             class="w-[200px] justify-between"
             role="combobox"
-            aria-expanded={open}
+            aria-expanded={isOpen}
           >
             {selectedPatients.length > 0
               ? `${selectedPatients.length} selected`
@@ -93,11 +68,7 @@
                 {#each patientsList as patient (patient.uuid)}
                   <Command.Item
                     value={patient.uuid}
-                    onSelect={() => {
-                      selectedPatients = selectedPatients.includes(patient.uuid)
-                        ? selectedPatients.filter((uuid) => uuid !== patient.uuid)
-                        : [...selectedPatients, patient.uuid];
-                    }}
+                    onSelect={() => togglePatientSelection(patient.uuid)}
                   >
                     <Check
                       class={cn(
@@ -115,59 +86,46 @@
       </Popover.Root>
     {/await}
   </div>
-  <div class="rounded-md border">
-    <Table.Root>
-      <Table.Header>
-        {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-          <Table.Row>
-            {#each headerGroup.headers as header (header.id)}
-              <Table.Head colspan={header.colSpan}>
-                {#if !header.isPlaceholder}
-                  <button
-                    onclick={header.column.getToggleSortingHandler()}
-                    class="flex items-center gap-2 hover:opacity-70 cursor-pointer"
-                  >
-                    <FlexRender
-                      content={header.column.columnDef.header}
-                      context={header.getContext()}
-                    />
-                    {#if header.column.getIsSorted() === 'asc'}
-                      <ArrowUpZA class="h-4 w-4" />
-                    {:else if header.column.getIsSorted() === 'desc'}
-                      <ArrowDownAZ class="h-4 w-4" />
-                    {/if}
-                  </button>
+
+  <!-- Reports Grid -->
+  {#if data.length === 0}
+    <div class="text-center py-12 text-muted-foreground">No results.</div>
+  {:else}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {#each data as item, idx (idx)}
+        {#if isPatientVisible(item)}
+          <Card.Root
+            onclick={() => onRowClick?.(item)}
+            class="cursor-pointer hover:shadow-lg transition-shadow"
+          >
+            <Card.Header>
+              <Card.Title class="mb-4">{getPatientName(item)}</Card.Title>
+              <div class="space-y-3">
+                {#if item.summary}
+                  <div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">Summary</div>
+                    <div class="text-sm font-medium line-clamp-4">
+                      {item.summary}
+                    </div>
+                  </div>
                 {/if}
-              </Table.Head>
-            {/each}
-          </Table.Row>
-        {/each}
-      </Table.Header>
-      <Table.Body>
-        {#each table.getRowModel().rows as row (row.id)}
-          {#if selectedPatients.length === 0 || selectedPatients.includes((row.original as any).expand.patient.uuid)}
-            <Table.Row
-              data-state={row.getIsSelected() && 'selected'}
-              onclick={() => onRowClick?.(row.original)}
-              class="cursor-pointer hover:bg-muted"
-            >
-              {#each row.getVisibleCells() as cell (cell.id)}
-                <Table.Cell
-                  style={cell.column.columnDef.size !== 150
-                    ? `width: ${cell.column.columnDef.size}px; min-width: ${cell.column.columnDef.size}px; max-width: ${cell.column.columnDef.size}px;`
-                    : ''}
-                >
-                  <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-                </Table.Cell>
-              {/each}
-            </Table.Row>
-          {/if}
-        {:else}
-          <Table.Row>
-            <Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
-          </Table.Row>
-        {/each}
-      </Table.Body>
-    </Table.Root>
-  </div>
+                {#if item.created}
+                  <div>
+                    <div class="text-xs font-semibold text-muted-foreground uppercase">Created</div>
+                    <div class="text-sm font-medium">
+                      {new Date(item.created).toLocaleDateString(getLocale(), {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            </Card.Header>
+          </Card.Root>
+        {/if}
+      {/each}
+    </div>
+  {/if}
 </div>
