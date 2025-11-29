@@ -27,7 +27,7 @@
     />
   </div>
   {#if isOpen}
-    <div class="w-full md:w-[30%]">
+    <div class="w-full md:w-[27%] relative">
       <KeyPartsBlock keyParts={patientRecord.keyParts as KeyPart[]} bind:hoveredCitations />
     </div>
   {/if}

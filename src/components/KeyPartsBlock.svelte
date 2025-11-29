@@ -8,7 +8,7 @@
   }: { keyParts: KeyPart[]; hoveredCitations?: string[] | null } = $props();
 </script>
 
-<div class="h-full w-full cursor-pointer flex flex-col gap-2">
+<div class="w-full cursor-pointer flex flex-col gap-2 sticky top-0">
   {#each keyParts as part}
     <KeyPartCard keyPart={part} bind:hoveredCitations />
   {/each}
