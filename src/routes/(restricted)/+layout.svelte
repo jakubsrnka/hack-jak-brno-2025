@@ -9,6 +9,8 @@
   <AppSidebar />
   <main class="flex flex-col w-full p-3">
     <Sidebar.Trigger />
-    {@render children()}
+    <div class="pt-2 md:p-4 lg:p-8">
+      {@render children()}
+    </div>
   </main>
 </Sidebar.Provider>

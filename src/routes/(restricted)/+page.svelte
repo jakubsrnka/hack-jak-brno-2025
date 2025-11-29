@@ -21,6 +21,10 @@
     .collection(Collections.PatientReports)
     .getFullList<PatientReportWithPatient>({ expand: 'patient' });
 
+  const patients: Promise<PatientsResponse[]> = pbClient
+    .collection(Collections.Patients)
+    .getFullList<PatientsResponse>();
+
   const handleRowClick = (row: PatientReportWithPatient) => {
     const patientId = row.expand.patient.id;
     const reportId = row.id;
@@ -84,5 +88,5 @@
     </table>
   </div>
 {:then loadedData}
-  <ReportsTable data={loadedData} {columns} onRowClick={handleRowClick} />
+  <ReportsTable data={loadedData} {columns} onRowClick={handleRowClick} {patients} />
 {/await}
