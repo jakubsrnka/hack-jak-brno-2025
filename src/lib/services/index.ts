@@ -47,7 +47,7 @@ export const insertPatient = async (patientId: string): Promise<PatientsResponse
     throw new Error('No authenticated user found');
   }
 
-  const list = await collection.getList(1, 1, { filter: `id="${patientId}"` });
+  const list = await collection.getList(1, 1, { filter: `uuid="${patientId}"` });
 
   if (list.items?.length) {
     const patient = list.items[0] as unknown as PatientsResponse;

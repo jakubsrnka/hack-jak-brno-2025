@@ -13,6 +13,7 @@
   } from '$lib/helpers/xmlDocumentationToPBType';
   import { createEmptyReport, createRecords, insertPatient } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
+  import { goto } from '$app/navigation';
 
   type Props = {
     open?: boolean;
@@ -58,10 +59,10 @@
         const report = await createEmptyReport(patient.id);
         const records = extractDocumentationRecords(data, patient.id);
         await createRecords(report.id, records);
-        console.log('Converted JSON data:', data);
 
         resetForm();
         open = false;
+        await goto('/patients/' + patient.id + '/report/' + report.id);
       } catch (error) {
         console.error('Error processing XML:', error);
         alert('Chyba při zpracování XML dokumentu.');
