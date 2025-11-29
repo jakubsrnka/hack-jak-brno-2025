@@ -10,13 +10,17 @@
             "enum": [1, 2, 3],
             "type": "number"
           },
-          "citation": {
-            "type": "string"
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
           },
           "reason": {
             "type": "string"
           },
-          "type": {
+          "types": {
             "type": "array",
             "items": {
               "enum": ["__AVAILABLE_KEYPART_TYPES__"],
@@ -25,7 +29,7 @@
             "minItems": 1
           }
         },
-        "required": ["importance", "citation", "reason", "type"],
+        "required": ["importance", "citations", "reason", "types"],
         "type": "object"
       },
       "type": "array"

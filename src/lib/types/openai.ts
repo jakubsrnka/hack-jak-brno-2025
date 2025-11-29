@@ -1,8 +1,8 @@
 export type KeyPart = {
   importance: 1 | 2 | 3;
-  citation: string;
+  citations: string[];
   reason: string;
-  type: string[];
+  types: string[];
 };
 
 export type RecordAIData = {
