@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { Check, ChevronsUpDown } from 'lucide-svelte';
+  import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
   import { type PatientsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
   import * as Command from '$components/ui/command';
   import { Button } from '$components/ui/button';
   import * as Card from '$components/ui/card';
+  import { RangeCalendar } from '$components/ui/range-calendar';
   import { cn } from '$lib/utils';
   import { getLocale } from '$lib/paraglide/runtime';
+  import type { DateRange } from 'bits-ui';
 
   interface Props {
     data: any[];
@@ -19,6 +21,8 @@
 
   let selectedPatients = $state<string[]>([]);
   let isOpen = $state(false);
+  let dateRange = $state<DateRange | undefined>(undefined);
+  let isCalendarOpen = $state(false);
 
   function getNestedValue(obj: any, path: string): any {
     return path.split('.').reduce((current, prop) => current?.[prop], obj);
@@ -36,12 +40,55 @@
 
   function isPatientVisible(item: any): boolean {
     const patientUuid = getNestedValue(item, 'expand.patient.uuid');
-    return selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
+    const isPatientSelected =
+      selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
+
+    if (!isPatientSelected) return false;
+
+    if (!dateRange?.start) return true;
+
+    const itemDate = new Date(item.created);
+    const startDate = new Date(
+      dateRange.start.year,
+      dateRange.start.month - 1,
+      dateRange.start.day
+    );
+    const endDate = dateRange.end
+      ? new Date(dateRange.end.year, dateRange.end.month - 1, dateRange.end.day)
+      : startDate;
+
+    return itemDate >= startDate && itemDate <= endDate;
+  }
+
+  function formatDateRange(): string {
+    if (!dateRange?.start) return 'Select dates...';
+
+    const startDate = new Date(
+      dateRange.start.year,
+      dateRange.start.month - 1,
+      dateRange.start.day
+    );
+    const start = startDate.toLocaleDateString(getLocale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    if (!dateRange.end) return start;
+
+    const endDate = new Date(dateRange.end.year, dateRange.end.month - 1, dateRange.end.day);
+    const end = endDate.toLocaleDateString(getLocale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    return `${start} - ${end}`;
   }
 </script>
 
 <div class="space-y-4">
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2 flex-wrap">
     {#await patients}
       <Skeleton class="h-10 w-[200px]" />
     {:then patientsList}
@@ -85,6 +132,20 @@
         </Popover.Content>
       </Popover.Root>
     {/await}
+
+    <Popover.Root bind:open={isCalendarOpen}>
+      <Popover.Trigger>
+        <Button variant="outline" class="w-[250px] justify-between">
+          <div class="flex items-center gap-2">
+            <Calendar class="size-4" />
+            <span>{formatDateRange()}</span>
+          </div>
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content class="w-auto p-0" align="start">
+        <RangeCalendar bind:value={dateRange} />
+      </Popover.Content>
+    </Popover.Root>
   </div>
 
   <!-- Reports Grid -->
