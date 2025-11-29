@@ -11,6 +11,8 @@
   import { defaultSearchKeys, type SearchKey } from '$lib/constants/settingsDefaults';
   import XIcon from 'lucide-svelte/icons/x';
   import PlusIcon from 'lucide-svelte/icons/plus';
+  import HelpCircleIcon from 'lucide-svelte/icons/help-circle';
+  import * as Tooltip from '$components/ui/tooltip';
 
   // Define settings interface
   interface UserSettings {
@@ -90,7 +92,20 @@
       <CardContent class="space-y-6">
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <Label>Vyhledávací klíče</Label>
+            <div class="flex items-center gap-2">
+              <Label>Vyhledávací klíče</Label>
+              <Tooltip.Root>
+                <Tooltip.Trigger>
+                  <HelpCircleIcon class="h-4 w-4 text-muted-foreground" />
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  <p class="max-w-xs">
+                    Vyhledávací klíče by měly být stručné a věcné, tak aby bylo možné v textu hledat
+                    obsah, který s klíčem souvisí
+                  </p>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </div>
             <Button variant="outline" size="sm" onclick={addSearchKey} type="button">
               <PlusIcon class="h-4 w-4 mr-1" />
               Přidat klíč
