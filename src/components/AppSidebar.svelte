@@ -2,6 +2,9 @@
   import * as Sidebar from '$components/ui/sidebar/index.js';
   import { Users, House, ChevronUp } from 'lucide-svelte';
   import * as DropdownMenu from '$components/ui/dropdown-menu';
+  import { currentUser, logout } from '$lib/pocketbase';
+  import { Button } from '$components/ui/button';
+  import { m } from '$lib/paraglide/messages';
 
   const items = [
     {
@@ -46,14 +49,16 @@
                       {...props}
                       class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                     >
-                      Uživatelské jméno
+                      {$currentUser?.name}
                       <ChevronUp class="ms-auto" />
                     </Sidebar.MenuButton>
                   {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content side="top" class="w-(--bits-dropdown-menu-anchor-width)">
                   <DropdownMenu.Item>
-                    <span>Odhlášení</span>
+                    <Button variant="destructive" class="w-full text-left" onclick={logout}
+                      >{m.sidepanel_logout()}</Button
+                    >
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
