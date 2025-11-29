@@ -1,7 +1,10 @@
 <script lang="ts">
   import { Button } from '$components/ui/button';
   import { Skeleton } from '$components/ui/skeleton';
+  import { pbClient } from '$lib/pocketbase';
   import { getPatientReport } from '$lib/services';
+  import type { KeyPart } from '$types/openai';
+  import { Collections, type PatientsRecord } from '$types/pocketbase';
 
   let buttonText = $state('Send to AI');
 
@@ -15,7 +18,7 @@
       input = null;
       output = null;
       buttonText = 'Retrieving...';
-      const report = await getPatientReport('pspmpywfqmwk8v7');
+      const report = await getPatientReport('sgqx2g5zu70ayj8');
       input = JSON.stringify(report, null, 2);
       buttonText = 'Sending...';
 
@@ -35,7 +38,28 @@
         throw new Error('Network response was not ok');
       }
 
-      const data = await response.json();
+      type AIResponse = {
+        summary: string;
+        records: {
+          id: string;
+          summary: string;
+          keyParts: KeyPart[];
+        }[];
+      };
+
+      const data: AIResponse = await response.json();
+
+      // pbClient.collection(Collections.PatientRecords).update<PatientsRecord>('sgqx2g5zu70ayj8', {
+      //   summary: data.summary
+      // });
+
+      // data.records.forEach(async (record) => {
+      //   await pbClient.collection(Collections.PatientRecords).update(record.id, {
+      //     summary: record.summary,
+      //     keyParts: record.keyParts
+      //   });
+      // });
+
       console.log('AI Response:', data);
       output = JSON.stringify(data, null, 2);
       buttonText = 'Done';
