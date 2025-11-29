@@ -18,7 +18,6 @@
   import * as Popover from '$components/ui/popover/index.js';
   import { cn } from '$lib/utils.js';
   import type { KeyPart } from '$types/openai';
-  import Label from '$components/ui/label/label.svelte';
 
   let reportId = page.params.reportId;
   let selectedRecordTypes = $state<string[]>([]);

@@ -37,11 +37,11 @@
       if (citations) {
         const citationArray = Array.isArray(citations)
           ? citations.flatMap((c) =>
-            String(c)
-              .split('...')
-              .map((s) => s.trim())
-              .filter(Boolean)
-          )
+              String(c)
+                .split('...')
+                .map((s) => s.trim())
+                .filter(Boolean)
+            )
           : [citations];
 
         citationArray.forEach((citation) => {
@@ -49,7 +49,7 @@
           let cleanedCitation = citation.trim();
           if (
             (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
-            (cleanedCitation.startsWith('\'') && cleanedCitation.endsWith('\''))
+            (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
           ) {
             cleanedCitation = cleanedCitation.slice(1, -1);
           }
@@ -122,11 +122,11 @@
       const citationsToHighlight = matchingPart?.citations
         ? Array.isArray(matchingPart.citations)
           ? matchingPart.citations.flatMap((c) =>
-            String(c)
-              .split('...')
-              .map((s) => s.trim())
-              .filter(Boolean)
-          )
+              String(c)
+                .split('...')
+                .map((s) => s.trim())
+                .filter(Boolean)
+            )
           : [matchingPart.citations]
         : [citation];
 
@@ -135,7 +135,7 @@
         let cleanedCitation = citationText.trim();
         if (
           (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
-          (cleanedCitation.startsWith('\'') && cleanedCitation.endsWith('\''))
+          (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
         ) {
           cleanedCitation = cleanedCitation.slice(1, -1);
         }
