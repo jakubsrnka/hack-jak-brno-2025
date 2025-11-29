@@ -15,7 +15,7 @@ export const extractDocumentationRecords = (
     const record = recordWrapper.zaznam;
     const dateStr = new Date(record.children[0].datum!.content).toLocaleDateString();
     return {
-      text: `${record.children[2].text!.content}\n\nDatum stanovení diagnózy: ${dateStr}`,
+      text: `${record.children[2].text!.content}\n\nDatum vydání zprávy: ${dateStr}`,
       type: record.children[1].typ!.content,
       date: new Date(record.children[0].datum!.content).toISOString().split('T')[0],
       report: reportId
