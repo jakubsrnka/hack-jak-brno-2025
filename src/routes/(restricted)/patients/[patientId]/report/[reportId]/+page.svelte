@@ -7,6 +7,9 @@
   import { getPatientRecords } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
   import Label from '$components/ui/label/label.svelte';
+  import { Button } from '$components/ui/button';
+  import { goto } from '$app/navigation';
+  import ClockIcon from 'lucide-svelte/icons/clock';
 
   let reportId = page.params.reportId;
   let selectedRecordType = $state<string | null>(null);
@@ -52,7 +55,7 @@
             {selectedRecordType ?? 'Typ záznamu'}
           </Select.Trigger>
           <Select.Content>
-            {#each uniqueRecordTypes as type}
+            {#each uniqueRecordTypes as type (type)}
               <Select.Item value={type} onclick={() => (selectedRecordType = type)}>
                 {type}
               </Select.Item>
@@ -67,9 +70,19 @@
         <Label>Hledat v záznamech</Label>
         <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
       </div>
+      <div class="flex flex-col gap-2 justify-end">
+        <Button
+          variant="outline"
+          onclick={() => goto(`/patients/${page.params.patientId}/report/${reportId}/timeline`)}
+          class="whitespace-nowrap"
+        >
+          <ClockIcon class="h-4 w-4 mr-2" />
+          Časová osa
+        </Button>
+      </div>
     </div>
     <div class="flex flex-col gap-4 flex-1">
-      {#each filteredRecords as record, index (record.id)}
+      {#each filteredRecords as record (record.id)}
         <RecordBlock patientRecord={record} {searchQuery} />
       {/each}
     </div>
