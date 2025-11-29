@@ -1,11 +1,12 @@
 <script lang="ts">
-  import * as Sidebar from '$components/ui/sidebar/index.js';
-  import { Users, House, ChevronUp } from 'lucide-svelte';
+  import * as Sidebar from '$components/ui/sidebar';
+  import { Users, House, ChevronUp, Upload, NotebookPen } from 'lucide-svelte';
   import * as DropdownMenu from '$components/ui/dropdown-menu';
   import { currentUser, logout } from '$lib/pocketbase';
   import { Button } from '$components/ui/button';
   import { m } from '$lib/paraglide/messages';
   import { uploadDocumentDialogOpen } from '$lib/stores/dialog';
+  import { goto } from '$app/navigation';
 
   const items = [
     {
@@ -28,7 +29,11 @@
 <Sidebar.Root>
   <Sidebar.Content>
     <Sidebar.Group class="h-full">
-      <Sidebar.GroupLabel>Docuhelper</Sidebar.GroupLabel>
+      <Sidebar.GroupLabel onclick={() => goto('/')}
+        ><NotebookPen class="mr-2" />
+        <span class="font-bold">Docuhelper</span></Sidebar.GroupLabel
+      >
+      <Sidebar.Separator class="mb-2" />
       <Sidebar.GroupContent class="h-full justify-between flex flex-col">
         <Sidebar.Menu>
           {#each items as item (item.title)}
@@ -48,7 +53,9 @@
           <Sidebar.Menu>
             <Sidebar.MenuItem>
               <Sidebar.MenuButton onclick={openUploadDialog}>
-                <span>Nahrát dokumentaci</span>
+                <div class="flex gap-1.5 items-center hover:cursor-pointer">
+                  <Upload size={16} />Nahrát dokumentaci
+                </div>
               </Sidebar.MenuButton>
             </Sidebar.MenuItem>
             <Sidebar.MenuItem>
@@ -57,8 +64,9 @@
                   {#snippet child({ props })}
                     <Sidebar.MenuButton
                       {...props}
-                      class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                      class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:cursor-pointer"
                     >
+                      <!-- TODO add profile picture -->
                       {$currentUser?.name}
                       <ChevronUp class="ms-auto" />
                     </Sidebar.MenuButton>
