@@ -19,7 +19,7 @@
 
   const data: Promise<PatientReportWithPatient[]> = pbClient
     .collection(Collections.PatientReports)
-    .getFullList<PatientReportWithPatient>({ expand: 'patient' });
+    .getFullList<PatientReportWithPatient>({ expand: 'patient', sort: '-created' });
 
   const patients: Promise<PatientsResponse[]> = pbClient
     .collection(Collections.Patients)
@@ -38,7 +38,7 @@
 
 <!-- Upload section -->
 <div
-  class="mb-6 flex items-center gap-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20"
+  class="mb-6 flex items-center gap-4 p-4 bg-linear-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20"
 >
   <div class="p-3 bg-primary/10 rounded-full">
     <FileTextIcon class="h-6 w-6 text-primary" />

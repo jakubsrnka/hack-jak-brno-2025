@@ -1,19 +1,24 @@
 <script lang="ts">
   import { Check, ChevronsUpDown, Calendar } from 'lucide-svelte';
-  import { type PatientsResponse } from '$types/pocketbase';
+  import { type PatientsResponse, type PatientReportsResponse } from '$types/pocketbase';
   import { Skeleton } from '$components/ui/skeleton';
   import * as Popover from '$components/ui/popover';
   import * as Command from '$components/ui/command';
   import { Button } from '$components/ui/button';
-  import * as Card from '$components/ui/card';
+  import ReportCard from '$components/ReportCard.svelte';
   import { RangeCalendar } from '$components/ui/range-calendar';
   import { cn } from '$lib/utils';
   import { getLocale } from '$lib/paraglide/runtime';
   import type { DateRange } from 'bits-ui';
+  import { m } from '$lib/paraglide/messages';
+
+  type PatientReportWithPatient = PatientReportsResponse<{
+    patient: PatientsResponse;
+  }>;
 
   interface Props {
-    data: any[];
-    onRowClick?: (row: any) => void;
+    data: PatientReportWithPatient[];
+    onRowClick?: (row: PatientReportWithPatient) => void;
     patients: Promise<PatientsResponse[]>;
   }
 
@@ -24,12 +29,8 @@
   let dateRange = $state<DateRange | undefined>(undefined);
   let isCalendarOpen = $state(false);
 
-  function getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
-  }
-
-  function getPatientName(item: any): string {
-    return getNestedValue(item, 'expand.patient.uuid') || 'Unknown Patient';
+  function getPatientName(item: PatientReportWithPatient): string {
+    return item.expand.patient.uuid || 'Unknown Patient';
   }
 
   function togglePatientSelection(patientUuid: string) {
@@ -38,8 +39,8 @@
       : [...selectedPatients, patientUuid];
   }
 
-  function isPatientVisible(item: any): boolean {
-    const patientUuid = getNestedValue(item, 'expand.patient.uuid');
+  function isPatientVisible(item: PatientReportWithPatient): boolean {
+    const patientUuid = item.expand.patient.uuid;
     const isPatientSelected =
       selectedPatients.length === 0 || selectedPatients.includes(patientUuid);
 
@@ -61,7 +62,7 @@
   }
 
   function formatDateRange(): string {
-    if (!dateRange?.start) return 'Vyberte datum...';
+    if (!dateRange?.start) return m.reports_selectDates();
 
     const startDate = new Date(
       dateRange.start.year,
@@ -102,15 +103,15 @@
           >
             {selectedPatients.length > 0
               ? `${selectedPatients.length} selected`
-              : 'Vyberte pacienta...'}
+              : m.reports_selectPatients()}
             <ChevronsUpDown class="ms-2 size-4 shrink-0 opacity-50" />
           </Button>
         </Popover.Trigger>
         <Popover.Content class="w-[200px] p-0">
           <Command.Root>
-            <Command.Input placeholder="Search patients..." />
+            <Command.Input placeholder={m.reports_searchPatients()} />
             <Command.List>
-              <Command.Empty>Pacienti nebyli nalezeni.</Command.Empty>
+              <Command.Empty>{m.reports_noPatientsFound()}</Command.Empty>
               <Command.Group>
                 {#each patientsList as patient (patient.uuid)}
                   <Command.Item
@@ -150,46 +151,17 @@
 
   <!-- Reports Grid -->
   {#if data.length === 0}
-    <div class="text-center py-12 text-muted-foreground">No results.</div>
+    <div class="text-center py-12 text-muted-foreground">{m.reports_noResults()}</div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {#each data as item, idx (idx)}
         {#if isPatientVisible(item)}
-          <Card.Root
+          <ReportCard
+            patientName={getPatientName(item)}
+            created={item.created}
+            shortSummary={item.shortSummary}
             onclick={() => onRowClick?.(item)}
-            class="cursor-pointer hover:shadow-lg transition-shadow"
-          >
-            <Card.Header>
-              <Card.Title class="mb-4">{getPatientName(item)}</Card.Title>
-              <div class="space-y-3">
-                {#if item.shortSummary}
-                  <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">
-                      Krátký popis
-                    </div>
-                    <div class="text-sm font-medium line-clamp-4">
-                      <!-- eslint-disable-next-line -->
-                      {@html item.shortSummary}
-                    </div>
-                  </div>
-                {/if}
-                {#if item.created}
-                  <div>
-                    <div class="text-xs font-semibold text-muted-foreground uppercase">
-                      Vytvořeno
-                    </div>
-                    <div class="text-sm font-medium">
-                      {new Date(item.created).toLocaleDateString(getLocale(), {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </div>
-                  </div>
-                {/if}
-              </div>
-            </Card.Header>
-          </Card.Root>
+          />
         {/if}
       {/each}
     </div>
