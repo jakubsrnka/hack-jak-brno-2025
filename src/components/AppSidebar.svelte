@@ -5,6 +5,7 @@
   import { currentUser, logout } from '$lib/pocketbase';
   import { Button } from '$components/ui/button';
   import { m } from '$lib/paraglide/messages';
+  import { uploadDocumentDialogOpen } from '$lib/stores/dialog';
 
   const items = [
     {
@@ -18,6 +19,10 @@
       icon: Users
     }
   ];
+
+  function openUploadDialog() {
+    uploadDocumentDialogOpen.set(true);
+  }
 </script>
 
 <Sidebar.Root>
@@ -55,6 +60,9 @@
                   {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content side="top" class="w-(--bits-dropdown-menu-anchor-width)">
+                  <DropdownMenu.Item onclick={openUploadDialog}>
+                    <span>Nahrát dokumentaci</span>
+                  </DropdownMenu.Item>
                   <DropdownMenu.Item>
                     <Button variant="destructive" class="w-full text-left" onclick={logout}
                       >{m.sidepanel_logout()}</Button
