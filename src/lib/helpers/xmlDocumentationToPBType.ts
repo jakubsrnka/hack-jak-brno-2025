@@ -13,11 +13,11 @@ export const extractDocumentationRecords = (
   const patientWrapper = xmlDoc.dokumentace.children[0];
   return patientWrapper.pacient.children.flatMap((recordWrapper) => {
     const record = recordWrapper.zaznam;
-    return record.children.map((rec) => ({
-      text: rec.text!.content,
-      type: rec.typ!.content,
-      date: new Date(rec.datum!.content).toISOString().split('T')[0],
+    return {
+      text: record.children[2].text!.content,
+      type: record.children[1].typ!.content,
+      date: new Date(record.children[0].datum!.content).toISOString().split('T')[0],
       report: reportId
-    }));
+    };
   });
 };

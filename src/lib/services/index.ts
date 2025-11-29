@@ -1,9 +1,85 @@
-import { pbClient } from "$lib/pocketbase";
-import type { KeyPart } from "$types/openai";
-import { Collections, type PatientRecordsResponse } from "$types/pocketbase";
+import { pbClient } from '$lib/pocketbase';
+import type { KeyPart } from '$types/openai';
+import {
+  Collections,
+  type CreateBase,
+  type PatientRecordsRecord,
+  type PatientRecordsResponse,
+  type PatientReportsResponse,
+  type PatientsResponse
+} from '$types/pocketbase';
 
-export const getPatientReport = async (id: string): Promise<PatientRecordsResponse<{
-  "patientRecords_via_report": PatientRecordsResponse<KeyPart[]>
-}>> => pbClient.collection(Collections.PatientReports).getOne(id, {
-  expand: "patientRecords_via_report"
-})
+export const getPatientReport = async (
+  id: string
+): Promise<
+  PatientRecordsResponse<{
+    patientRecords_via_report: PatientRecordsResponse<KeyPart[]>;
+  }>
+> =>
+  pbClient.collection(Collections.PatientReports).getOne(id, {
+    expand: 'patientRecords_via_report'
+  });
+
+export const insertPatient = async (patientId: string): Promise<PatientsResponse> => {
+  const collection = pbClient.collection(Collections.Patients);
+  const currentDoctorId = pbClient.authStore.record?.id;
+
+  if (!currentDoctorId) {
+    throw new Error('No authenticated user found');
+  }
+
+  const list = await collection.getList(1, 1, { filter: `id="${patientId}"` });
+
+  if (list.items?.length) {
+    const patient = list.items[0] as unknown as PatientsResponse;
+
+    // Check if current doctor is already assigned to this patient
+    if (!patient.doctor.includes(currentDoctorId)) {
+      // Add current doctor to the patient's doctor array
+      const updatedPatient = await collection.update(patient.id, {
+        doctor: [...patient.doctor, currentDoctorId]
+      });
+      return updatedPatient as PatientsResponse;
+    }
+
+    return patient;
+  }
+
+  // Patient doesn't exist, create with current doctor assigned
+  const created = await collection.create({
+    uuid: patientId,
+    doctor: [currentDoctorId]
+  });
+  return created as PatientsResponse;
+};
+
+export const createEmptyReport = async (patientId: string) => {
+  const collection = pbClient.collection(Collections.PatientReports);
+  const created = await collection.create({
+    patient: patientId
+  });
+  return created as PatientReportsResponse;
+};
+
+export const createRecords = async (
+  reportId: string,
+  records: CreateBase<PatientRecordsRecord>[]
+): Promise<PatientRecordsResponse[]> => {
+  const collection = pbClient.collection(Collections.PatientRecords);
+
+  console.log(records);
+
+  const createdRecords = await Promise.all(
+    records.map((record) =>
+      collection.create(
+        {
+          ...record,
+          report: reportId
+        },
+        { requestKey: null }
+      )
+    )
+  );
+
+  return createdRecords as PatientRecordsResponse[];
+};
