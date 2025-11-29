@@ -1,17 +1,17 @@
-import { currentUser, isLoggedIn, pbClient } from '$lib/pocketbase/';
+import { isLoggedIn, pbClient } from '$lib/pocketbase/';
 import { Collections } from '$types/pocketbase';
 import { redirect } from '@sveltejs/kit';
-import { get } from 'svelte/store';
 
 export const load = async () => {
   if (!isLoggedIn()) throw redirect(303, '/login');
 
   if (pbClient.authStore.isValid) {
     try {
-      pbClient.collection(Collections.Users).authRefresh({ fetch });
+      await pbClient.collection(Collections.Users).authRefresh({ fetch, requestKey: null });
     } catch (e) {
       pbClient.authStore.clear();
       console.log('User not authenticated, redirecting to login', e);
+      throw redirect(303, '/login');
     }
   }
 };
