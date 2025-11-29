@@ -111,6 +111,7 @@ export type PatientReportsRecord = {
   created: IsoAutoDateString;
   id: string;
   patient: RecordIdString;
+  shortSummary?: string;
   summary?: HTMLString;
   updated: IsoAutoDateString;
 };
