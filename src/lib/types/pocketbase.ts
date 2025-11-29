@@ -107,9 +107,10 @@ export type PatientRecordsRecord<TkeyParts = unknown> = {
   updated: IsoAutoDateString;
 };
 
-export type PatientReportsRecord = {
+export type PatientReportsRecord<Tkeywords = unknown> = {
   created: IsoAutoDateString;
   id: string;
+  keywords?: null | Tkeywords;
   patient: RecordIdString;
   shortSummary?: string;
   summary?: HTMLString;
@@ -151,7 +152,9 @@ export type PatientRecordsResponse<TkeyParts = unknown, Texpand = unknown> = Req
   PatientRecordsRecord<TkeyParts>
 > &
   BaseSystemFields<Texpand>;
-export type PatientReportsResponse<Texpand = unknown> = Required<PatientReportsRecord> &
+export type PatientReportsResponse<Tkeywords = unknown, Texpand = unknown> = Required<
+  PatientReportsRecord<Tkeywords>
+> &
   BaseSystemFields<Texpand>;
 export type PatientsResponse<Texpand = unknown> = Required<PatientsRecord> &
   BaseSystemFields<Texpand>;

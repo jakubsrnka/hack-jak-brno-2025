@@ -2,7 +2,7 @@
   import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
   import { page } from '$app/state';
   import RecordBlock from '$components/RecordBlock.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { getPatientRecords, getPatientReport } from '$lib/services';
   import Input from '$components/ui/input/input.svelte';
   import { Button } from '$components/ui/button';
@@ -10,6 +10,8 @@
   import ClockIcon from 'lucide-svelte/icons/clock';
   import { browser } from '$app/environment';
   import BigSummary from '$components/BigSummary.svelte';
+  import { pbClient } from '$lib/pocketbase';
+  import { Collections } from '$types/pocketbase';
   import CheckIcon from '@lucide/svelte/icons/check';
   import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
   import * as Command from '$components/ui/command/index.js';
@@ -122,6 +124,12 @@
       patientRecords = await getPatientRecords(reportId);
       patientReport = await getPatientReport(reportId);
 
+      // Subscribe to real-time updates for this report
+      pbClient.collection(Collections.PatientReports).subscribe(reportId, (e) => {
+        console.log('Report updated:', e);
+        patientReport = e.record as PatientReportsResponse;
+      });
+
       if (browser && window.location.hash) {
         const recordId = window.location.hash.substring(1);
         setTimeout(() => {
@@ -131,6 +139,13 @@
           }
         }, 100);
       }
+    }
+  });
+
+  onDestroy(() => {
+    // Unsubscribe from real-time updates when component is destroyed
+    if (reportId) {
+      pbClient.collection(Collections.PatientReports).unsubscribe(reportId);
     }
   });
 </script>
@@ -244,11 +259,13 @@
       <BigSummary text={patientReport?.summary ?? ''} />
     {/if}
     <div class="flex flex-col gap-4 flex-1">
-      {#each filteredRecords as record (record.id)}
-        <div id={record.id}>
-          <RecordBlock patientRecord={record} {searchQuery} />
-        </div>
-      {/each}
+      {#if reportId}
+        {#each filteredRecords as record (record.id)}
+          <div id={record.id}>
+            <RecordBlock patientRecord={record} {searchQuery} {reportId} />
+          </div>
+        {/each}
+      {/if}
     </div>
   </div>
 </div>
