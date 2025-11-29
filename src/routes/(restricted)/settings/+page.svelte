@@ -76,29 +76,6 @@
   </div>
 
   <div class="space-y-6">
-    <!-- Appearance Settings -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Vzhled</CardTitle>
-        <CardDescription>Přizpůsobte si vzhled aplikace</CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="space-y-0.5">
-            <Label for="dark-mode">Tmavý režim</Label>
-            <p class="text-sm text-muted-foreground">
-              Zapnout tmavý režim pro lepší zobrazení v noci
-            </p>
-          </div>
-          <Checkbox
-            id="dark-mode"
-            bind:checked={settings.darkMode}
-            onchange={handleDarkModeChange}
-          />
-        </div>
-      </CardContent>
-    </Card>
-
     <!-- Reports Settings -->
     <Card>
       <CardHeader>
@@ -146,6 +123,29 @@
               {/each}
             </div>
           {/if}
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Appearance Settings -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Vzhled</CardTitle>
+        <CardDescription>Přizpůsobte si vzhled aplikace</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="space-y-0.5">
+            <Label for="dark-mode">Tmavý režim</Label>
+            <p class="text-sm text-muted-foreground">
+              Zapnout tmavý režim pro lepší zobrazení v noci
+            </p>
+          </div>
+          <Checkbox
+            id="dark-mode"
+            bind:checked={settings.darkMode}
+            onchange={handleDarkModeChange}
+          />
         </div>
       </CardContent>
     </Card>
