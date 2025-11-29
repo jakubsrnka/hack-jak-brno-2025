@@ -35,12 +35,15 @@ export const POST = async ({ request }) => {
   const { report, wantedKeyParts } = body;
 
   const response = await friend.responses.create({
-    model: 'gpt-5.1',
+    model: 'gpt-5-nano',
     input: `${reportPrompt}
 
 ${wantedKeyParts.join(', ')}
 
-${JSON.stringify(report)}
+Contents:
+\`\`\`
+${report.expand.patientRecords_via_report.map((r) => r.text).join('\n\n---\n')}
+\`\`\`
 `,
     text: {
       format: {
