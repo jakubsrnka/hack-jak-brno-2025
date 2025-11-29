@@ -7,7 +7,7 @@
 
 <a href="/patients/{patient.id}">
   <Card.Root class="cursor-pointer gap-2 transition-shadow">
-    <Card.Header>
+    <Card.Header class="gap-0">
       <Card.Title>
         <User class="inline-block me-2" />
       </Card.Title>
