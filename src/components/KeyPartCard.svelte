@@ -31,9 +31,12 @@
     </Card.Title>
     <Card.Description class="flex flex-wrap gap-1 whitespace-normal">
       {#each keyPart.types as type (type)}
-        <Badge variant="default"
-               class={'text-white inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap ' + importanceColor}
-               title={type}>{type}</Badge>
+        <Badge
+          variant="default"
+          class={'text-white inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap ' +
+            importanceColor}
+          title={type}>{type}</Badge
+        >
       {/each}
     </Card.Description>
   </Card.Header>

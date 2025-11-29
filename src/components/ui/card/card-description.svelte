@@ -14,7 +14,7 @@
 <p
   bind:this={ref}
   data-slot="card-description"
-  class={cn('text-muted-foreground text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap', className)}
+  class={cn('text-muted-foreground text-sm w-full overflow-hidden text-ellipsis', className)}
   {title}
   {...restProps}
 >
