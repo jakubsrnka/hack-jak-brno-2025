@@ -60,7 +60,10 @@ ${JSON.stringify(report)}
 ${wantedKeyParts.join(', ')}
 Max key parts: ${Math.floor(record.text.split(' ').length / WORDS_PER_KEYPART)}
 
-${JSON.stringify(record)}
+Contents:
+\`\`\`
+${record.text}
+\`\`\`
 `,
         text: {
           format: {

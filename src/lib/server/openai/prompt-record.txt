@@ -9,7 +9,7 @@ You have the two following tasks:
 2. Highlight individual key parts of the record. The main point is to allow the documentator to easily see the key parts of the records, therefore not all records have to have key parts. Rather keep them shorter and relevant instead of just needlessly adding them without a reason.
   a. The maximum number of key parts you can find in the given text is always set in the maxKeyParts attribute.
   b. For each key part, you have to determine importance, which is based on what data the documentator wants you to highlight, 1 being the highest importance and 3 being the lowest and it's always an integer.
-  c. You have to cite a part of the input where this key fact is located. This citation will then be used to highlight a part of the original text, therefore the citation has to be exact. This citation has to 1:1 matchable to the original text, therefore no ellipsis, no more than one spot in the original text.
+  c. You have to cite a part of the input where this key fact is located. This citation will then be used to highlight a part of the original text, therefore the citation has to be exact. This citation has to 1:1 matchable to the original text, therefore no ellipsis, no more than one spot in the original text. Cite from the contents only, make sure you keep all whitespaces, newlines and special charaters.
   d. You also have to create a short reason in natural language for each of these records (just a few words).
   e. For each of this key parts, ouptut all the matching key part types. This array can not be empty as all key parts without a type will be filtered out.
 
