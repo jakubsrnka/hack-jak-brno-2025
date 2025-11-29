@@ -4,7 +4,7 @@
   let { text }: { text: string } = $props();
 </script>
 
-<Card.Root class="cursor-pointer gap-2 transition-shadow">
+<Card.Root class="gap-2 transition-shadow">
   <Card.Header>
     <Card.Title class="flex flex-col gap-2">Shrnutí</Card.Title>
   </Card.Header>
