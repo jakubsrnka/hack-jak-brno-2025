@@ -5,12 +5,16 @@
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$components/ui/card';
   import { Checkbox } from '$components/ui/checkbox';
   import { Label } from '$components/ui/label';
+  import { Input } from '$components/ui/input';
   import { toast } from 'svelte-sonner';
   import { setDarkMode } from '$lib/stores/theme';
+  import XIcon from 'lucide-svelte/icons/x';
+  import PlusIcon from 'lucide-svelte/icons/plus';
 
   // Define settings interface
   interface UserSettings {
     darkMode: boolean;
+    searchKeys: string[];
 
     [key: string]: unknown;
   }
@@ -18,7 +22,8 @@
   function getDefaultSettings(): UserSettings {
     const userSettings = $currentUser?.settings as UserSettings | null;
     return {
-      darkMode: userSettings?.darkMode ?? false
+      darkMode: userSettings?.darkMode ?? false,
+      searchKeys: userSettings?.searchKeys ?? []
     };
   }
 
@@ -49,6 +54,18 @@
 
   function handleDarkModeChange() {
     setDarkMode(settings.darkMode);
+  }
+
+  function addSearchKey() {
+    settings.searchKeys = [...settings.searchKeys, ''];
+  }
+
+  function removeSearchKey(index: number) {
+    settings.searchKeys = settings.searchKeys.filter((_, i) => i !== index);
+  }
+
+  function updateSearchKey(index: number, value: string) {
+    settings.searchKeys[index] = value;
   }
 </script>
 
@@ -88,7 +105,49 @@
         <CardTitle>Záznamy</CardTitle>
         <CardDescription>Nastavte předvolby pro práci se záznamy</CardDescription>
       </CardHeader>
-      <CardContent class="space-y-6"></CardContent>
+      <CardContent class="space-y-6">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <Label>Vyhledávací klíče</Label>
+            <Button variant="outline" size="sm" onclick={addSearchKey} type="button">
+              <PlusIcon class="h-4 w-4 mr-1" />
+              Přidat klíč
+            </Button>
+          </div>
+          <p class="text-sm text-muted-foreground">
+            Definujte klíče, které mohou vyhledávány v záznamech pacientů
+          </p>
+
+          {#if settings.searchKeys.length === 0}
+            <div
+              class="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-md"
+            >
+              Zatím nejsou definovány žádné vyhledávací klíče
+            </div>
+          {:else}
+            <div class="space-y-2">
+              {#each settings.searchKeys as searchKey, index (index)}
+                <div class="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Zadejte vyhledávací klíč"
+                    value={searchKey}
+                    oninput={(e) => updateSearchKey(index, e.currentTarget.value)}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onclick={() => removeSearchKey(index)}
+                    type="button"
+                  >
+                    <XIcon class="h-4 w-4" />
+                  </Button>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      </CardContent>
     </Card>
 
     <!-- Save Button -->
