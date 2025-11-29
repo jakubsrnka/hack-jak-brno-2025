@@ -23,7 +23,7 @@ export const isLoggedIn = () => {
   return !!get(currentUser);
 };
 
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, password: string, redirectUrl: string = '/') => {
   try {
     const { record } = await pbClient
       .collection(Collections.Users)
@@ -31,15 +31,15 @@ export const login = async (email: string, password: string) => {
     if (record) {
       currentUser.set(record as AuthRecord);
       toast.success('Login successful');
-      goto('/');
+      goto(redirectUrl);
     }
   } catch {
     toast.error('Invalid credentials');
   }
 };
 
-export const defaultLogin = async () => {
-  await login('tonda@docuhelper.site', '12345678');
+export const defaultLogin = async (redirectUrl: string = '/') => {
+  await login('tonda@docuhelper.site', '12345678', redirectUrl);
 };
 
 export const logout = () => {
