@@ -21,7 +21,8 @@
             "items": {
               "enum": ["__AVAILABLE_KEYPART_TYPES__"],
               "type": "string"
-            }
+            },
+            "minItems": 1
           }
         },
         "required": ["importance", "citation", "reason", "type"],

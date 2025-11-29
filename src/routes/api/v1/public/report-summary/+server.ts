@@ -7,7 +7,6 @@ import reportPrompt from '$lib/server/openai/prompt-report.txt';
 import recordPrompt from '$lib/server/openai/prompt-record.txt';
 import type { PatientRecordsResponse, PatientReportsResponse } from '$types/pocketbase';
 import type { KeyPart } from '$types/openai';
-import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions.js';
 
 const friend = new OpenAI({
   apiKey: OPENAI_API_KEY
@@ -35,15 +34,11 @@ export const POST = async ({ request }) => {
 
   const { report, wantedKeyParts } = body;
 
-  const parsedWantedKeyParts = wantedKeyParts
-    .map((keyPart) => REPORT_SUMMARY_OPTIONS.find((option) => option.id === keyPart)?.label)
-    .join(', ');
-
   const response = await friend.responses.create({
     model: 'gpt-5.1',
     input: `${reportPrompt}
 
-${parsedWantedKeyParts}
+${wantedKeyParts.join(', ')}
 
 ${JSON.stringify(report)}
 `,
@@ -62,6 +57,7 @@ ${JSON.stringify(report)}
         model: 'gpt-5.1',
         input: `${recordPrompt}
 
+${wantedKeyParts.join(', ')}
 Max key parts: ${Math.floor(record.text.split(' ').length / WORDS_PER_KEYPART)}
 
 ${JSON.stringify(record)}
