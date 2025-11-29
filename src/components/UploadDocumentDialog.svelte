@@ -4,7 +4,8 @@
   import { Label } from '$components/ui/label';
   import { Input } from '$components/ui/input';
   import { Spinner } from '$components/ui/spinner';
-  import { REPORT_SUMMARY_OPTIONS } from '$lib/constants/reportSummaryOptions';
+  import { defaultSearchKeys, type SearchKey } from '$lib/constants/settingsDefaults';
+  import { currentUser } from '$lib/pocketbase';
   import { convertXML } from 'simple-xml-to-json';
   import type { XmlDocumentation } from '$types/xmlDocumentation';
   import {
@@ -14,6 +15,7 @@
   import { createEmptyReport, createRecords, insertPatient } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
   import { goto } from '$app/navigation';
+  import { SvelteMap } from 'svelte/reactivity';
 
   type Props = {
     open?: boolean;
@@ -21,30 +23,39 @@
 
   let { open = $bindable(false) }: Props = $props();
 
-  const reportOptions = REPORT_SUMMARY_OPTIONS;
+  // Get search keys from user settings or use defaults
+  const searchKeys = $derived(
+    ($currentUser?.settings as { searchKeys?: SearchKey[] } | null)?.searchKeys?.length
+      ? (($currentUser?.settings as { searchKeys: SearchKey[] })?.searchKeys ?? defaultSearchKeys)
+      : defaultSearchKeys
+  );
 
   let isLoading = $state(false);
   let selectedFile: FileList | undefined = $state(undefined);
-  let checkboxes = $state<Record<string, boolean>>(
-    reportOptions.reduce(
-      (acc, option) => {
-        acc[option.id] = option.defaultValue;
-        return acc;
-      },
-      {} as Record<string, boolean>
-    )
-  );
+
+  // Store checkbox overrides (keys that user has toggled) using SvelteMap for reactivity
+  let checkboxOverrides = new SvelteMap<string, boolean>();
+
+  // Derive checkbox states based on current searchKeys and overrides
+  const checkboxes = $derived.by(() => {
+    const state: Record<string, boolean> = {};
+    for (const key of searchKeys) {
+      const keyId = `search-key-${key.id}`;
+      // Use override if available, otherwise default to true (checked)
+      state[keyId] = checkboxOverrides.has(keyId) ? checkboxOverrides.get(keyId)! : true;
+    }
+    return state;
+  });
+
+  function setCheckboxValue(keyId: string, value: boolean) {
+    checkboxOverrides.set(keyId, value);
+  }
 
   function handleSubmit() {
     if (!selectedFile || selectedFile.length === 0) {
       alert('Prosím, nahrajte XML dokument.');
       return;
     }
-
-    const selectedOptions = Object.entries(checkboxes)
-      .filter(([, checked]) => checked)
-      .map(([key]) => key);
-    console.log('Selected options:', selectedOptions);
 
     isLoading = true;
 
@@ -59,6 +70,12 @@
         const report = await createEmptyReport(patient.id);
         const records = extractDocumentationRecords(data, patient.id);
         await createRecords(report.id, records);
+
+        // We send labels to the model
+        const selectedLabels: string[] = searchKeys
+          .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
+          .map((searchKey) => searchKey.key);
+        console.log('Selected checkbox labels:', selectedLabels);
 
         resetForm();
         open = false;
@@ -80,13 +97,7 @@
   function resetForm() {
     selectedFile = undefined;
     isLoading = false;
-    checkboxes = reportOptions.reduce(
-      (acc, option) => {
-        acc[option.id] = option.defaultValue;
-        return acc;
-      },
-      {} as Record<string, boolean>
-    );
+    checkboxOverrides.clear(); // Clear all overrides, defaults to all checked
   }
 
   function handleCancel() {
@@ -119,10 +130,17 @@
       <div class="space-y-3 pt-2">
         <Label>Vyberte data k zobrazení</Label>
 
-        {#each reportOptions as option (option.id)}
+        {#each searchKeys as searchKey (searchKey.id)}
+          {@const keyId = `search-key-${searchKey.id}`}
+          {@const isChecked = checkboxes[keyId]}
           <div class="flex items-center space-x-2">
-            <Checkbox id={option.id} bind:checked={checkboxes[option.id]} disabled={isLoading} />
-            <Label for={option.id} class="cursor-pointer">{option.label}</Label>
+            <Checkbox
+              id={keyId}
+              checked={isChecked}
+              onchange={() => setCheckboxValue(keyId, !isChecked)}
+              disabled={isLoading}
+            />
+            <Label for={keyId} class="cursor-pointer">{searchKey.key}</Label>
           </div>
         {/each}
       </div>

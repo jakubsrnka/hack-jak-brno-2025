@@ -1,18 +1,16 @@
 export interface ReportSummaryOption {
-  id: string;
+  id: number;
   label: string;
-  defaultValue: boolean;
 }
 
 export const REPORT_SUMMARY_OPTIONS: ReportSummaryOption[] = [
-  { id: 'diagnoseDate', label: 'Datum stanovení diagnózy', defaultValue: false },
-  { id: 'tnmClassification', label: 'Klinická a patologická TNM klasifikace', defaultValue: false },
+  { id: 1, label: 'Datum stanovení diagnózy' },
+  { id: 2, label: 'Klinická a patologická TNM klasifikace' },
   {
-    id: 'hormonalReceptors',
-    label: 'Vyšetření hormonálních receptorů (ER, PR) a HER2',
-    defaultValue: false
+    id: 3,
+    label: 'Vyšetření hormonálních receptorů (ER, PR) a HER2'
   },
-  { id: 'treatmentOutsideOfMou', label: 'Léčba mimo MOÚ', defaultValue: false },
-  { id: 'progression', label: 'Progrese', defaultValue: false },
-  { id: 'distantMetastases', label: 'Recidiva a výskyt vzdálených metastáz', defaultValue: false }
+  { id: 4, label: 'Léčba mimo MOÚ' },
+  { id: 5, label: 'Progrese' },
+  { id: 6, label: 'Recidiva a výskyt vzdálených metastáz' }
 ];
