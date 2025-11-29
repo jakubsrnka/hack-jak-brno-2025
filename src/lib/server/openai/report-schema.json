@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "keyParts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "importance": {
+                  "enum": [1, 2, 3],
+                  "type": "number"
+                },
+                "position": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "end": {
+                      "type": "number"
+                    },
+                    "start": {
+                      "type": "number"
+                    }
+                  },
+                  "required": ["start", "end"],
+                  "type": "object"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": ["importance", "position", "reason"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "summary", "keyParts"],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": ["id", "summary", "records"],
+  "additionalProperties": false,
+  "type": "object"
+}
