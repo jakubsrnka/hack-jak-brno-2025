@@ -13,14 +13,17 @@
     extractPatientIdFromData
   } from '$lib/helpers/xmlDocumentationToPBType';
   import {
+    batchSetRecordsAIData,
     createEmptyReport,
     createRecords,
-    fetchReportSummary,
-    insertPatient
+    getPatientReport,
+    insertPatient,
+    setReportSummary
   } from '$lib/services';
   import * as Dialog from '$components/ui/dialog';
   import { goto } from '$app/navigation';
   import { SvelteMap } from 'svelte/reactivity';
+  import type { AIResponse } from '$types/openai';
 
   type Props = {
     open?: boolean;
@@ -38,12 +41,15 @@
   let isLoading = $state(false);
   let selectedFile: FileList | undefined = $state(undefined);
 
+  // Store checkbox overrides (keys that user has toggled) using SvelteMap for reactivity
   let checkboxOverrides = new SvelteMap<string, boolean>();
 
+  // Derive checkbox states based on current searchKeys and overrides
   const checkboxes = $derived.by(() => {
     const state: Record<string, boolean> = {};
     for (const key of searchKeys) {
       const keyId = `search-key-${key.id}`;
+      // Use override if available, otherwise default to true (checked)
       state[keyId] = checkboxOverrides.has(keyId) ? checkboxOverrides.get(keyId)! : true;
     }
     return state;
@@ -57,20 +63,33 @@
     const data = convertXML(xmlContent) as XmlDocumentation;
     const patientId = extractPatientIdFromData(data);
     const patient = await insertPatient(patientId);
+    const report = await createEmptyReport(patient.id);
+    const records = extractDocumentationRecords(data, patient.id);
+    await createRecords(report.id, records);
 
+    // We send labels to the model
     const selectedLabels: string[] = searchKeys
       .filter((searchKey) => checkboxes[`search-key-${searchKey.id}`])
       .map((searchKey) => searchKey.key);
     console.log('Selected checkbox labels:', selectedLabels);
 
-    const report = await createEmptyReport(patient.id, selectedLabels);
-    const records = extractDocumentationRecords(data, patient.id);
-    await createRecords(report.id, records);
+    const fullReport = await getPatientReport(report.id);
 
-    fetchReportSummary(report.id, selectedLabels).catch((error) => {
-      console.error('Background summary generation failed:', error);
+    const response = await fetch('/api/v1/public/report-summary', {
+      method: 'POST',
+      body: JSON.stringify({
+        report: fullReport,
+        wantedKeyParts: selectedLabels
+      })
     });
 
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const responseData = (await response.json()) as AIResponse;
+    await setReportSummary(report.id, responseData.summary, responseData.shortSummary);
+    await batchSetRecordsAIData(responseData.records);
     return { patient, report };
   }
 

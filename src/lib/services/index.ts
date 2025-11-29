@@ -1,5 +1,5 @@
 import { pbClient } from '$lib/pocketbase';
-import type { KeyPart, RecordAIData, ReportSummaryResponse } from '$types/openai';
+import type { KeyPart, RecordAIData } from '$types/openai';
 import {
   Collections,
   type CreateBase,
@@ -17,8 +17,7 @@ export const getPatientReport = async (
   }>
 > =>
   pbClient.collection(Collections.PatientReports).getOne(id, {
-    expand: 'patientRecords_via_report',
-    requestKey: null
+    expand: 'patientRecords_via_report'
   });
 
 export const getPatientsByDoctor = async (doctorIds: string[]): Promise<PatientsResponse[]> => {
@@ -73,11 +72,10 @@ export const insertPatient = async (patientId: string): Promise<PatientsResponse
   return created as PatientsResponse;
 };
 
-export const createEmptyReport = async (patientId: string, keywords: string[]) => {
+export const createEmptyReport = async (patientId: string) => {
   const collection = pbClient.collection(Collections.PatientReports);
   const created = await collection.create({
-    patient: patientId,
-    keywords
+    patient: patientId
   });
   return created as PatientReportsResponse;
 };
@@ -124,56 +122,21 @@ export const setReportSummary = async (reportId: string, summary: string, shortS
   });
 };
 
-export const fetchRecordAIData = async (
-  recordId: string,
-  wantedKeyParts: string[]
-): Promise<RecordAIData> => {
-  const record = await pbClient
-    .collection(Collections.PatientRecords)
-    .getOne<PatientRecordsResponse>(recordId, { requestKey: null });
-
-  const response = await fetch('/api/v1/public/record-summary', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      record,
-      wantedKeyParts
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch record AI data');
-  }
-
-  return (await response.json()) as RecordAIData;
-};
-
-export async function fetchReportSummary(reportId: string, selectedLabels: string[]) {
-  const fullReport = await getPatientReport(reportId);
-
-  const response = await fetch('/api/v1/public/report-summary', {
-    method: 'POST',
-    body: JSON.stringify({
-      report: fullReport,
-      wantedKeyParts: selectedLabels
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  const responseData = (await response.json()) as ReportSummaryResponse;
-  await setReportSummary(fullReport.id, responseData.summary, responseData.shortSummary);
-}
-
-export const setRecordAIData = async (recordId: string, data: RecordAIData) => {
+export const batchSetRecordsAIData = async (records: RecordAIData[]) => {
   const collection = pbClient.collection(Collections.PatientRecords);
 
-  return await collection.update(recordId, {
-    summary: data.summary,
-    keyParts: data.keyParts
-  });
+  const updatedRecords = await Promise.all(
+    records.map((record) =>
+      collection.update(
+        record.id,
+        {
+          summary: record.summary,
+          keyParts: record.keyParts
+        },
+        { requestKey: null }
+      )
+    )
+  );
+
+  return updatedRecords as PatientRecordsResponse[];
 };

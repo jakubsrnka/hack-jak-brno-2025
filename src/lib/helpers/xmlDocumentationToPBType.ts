@@ -13,8 +13,9 @@ export const extractDocumentationRecords = (
   const patientWrapper = xmlDoc.dokumentace.children[0];
   return patientWrapper.pacient.children.flatMap((recordWrapper) => {
     const record = recordWrapper.zaznam;
+    const dateStr = new Date(record.children[0].datum!.content).toLocaleDateString();
     return {
-      text: record.children[2].text!.content,
+      text: `${record.children[2].text!.content}\n\nDatum vydání zprávy: ${dateStr}`,
       type: record.children[1].typ!.content,
       date: new Date(record.children[0].datum!.content).toISOString().split('T')[0],
       report: reportId

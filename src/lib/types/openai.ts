@@ -11,11 +11,6 @@ export type RecordAIData = {
   keyParts: KeyPart[];
 };
 
-export type ReportSummaryResponse = {
-  shortSummary: string;
-  summary: string;
-};
-
 export type AIResponse = {
   shortSummary: string;
   summary: string;
