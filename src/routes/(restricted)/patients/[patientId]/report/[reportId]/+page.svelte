@@ -18,7 +18,7 @@
   import * as Popover from '$components/ui/popover/index.js';
   import { cn } from '$lib/utils.js';
   import type { KeyPart } from '$types/openai';
-  import { Label } from '$components/ui/label';
+  import Label from '$components/ui/label/label.svelte';
 
   let reportId = page.params.reportId;
   let selectedRecordTypes = $state<string[]>([]);
@@ -243,7 +243,6 @@
         </Popover.Root>
       </div>
       <div class="flex flex-col gap-2 w-full">
-        <Label>Hledat v záznamech</Label>
         <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
       </div>
       <div class="flex flex-col gap-2 justify-end">
@@ -261,11 +260,13 @@
       <BigSummary text={patientReport?.summary ?? ''} />
     {/if}
     <div class="flex flex-col gap-4 flex-1">
-      {#each filteredRecords as record (record.id)}
-        <div id={record.id}>
-          <RecordBlock patientRecord={record} {searchQuery} {reportId} />
-        </div>
-      {/each}
+      {#if reportId}
+        {#each filteredRecords as record (record.id)}
+          <div id={record.id}>
+            <RecordBlock patientRecord={record} {searchQuery} {reportId} />
+          </div>
+        {/each}
+      {/if}
     </div>
   </div>
 </div>
