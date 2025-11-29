@@ -2,6 +2,7 @@
   import type { PatientRecordsRecord } from '$types/pocketbase';
   import * as Card from '$components/ui/card/index.js';
   import * as Accordion from '$components/ui/accordion/index.js';
+  import { formatDateTime } from '$lib/utils';
   let {
     patientRecord,
     openRecordIds = $bindable(),
@@ -48,7 +49,7 @@
     <Card.Root class="gap-2 transition-shadow">
       <Card.Header class="relative gap-0">
         <Card.Title class="flex flex-col gap-0">
-          <span>{patientRecord.date}</span>
+          <span>{formatDateTime(patientRecord.date)}</span>
           <span>{patientRecord.type}</span>
         </Card.Title>
         <Accordion.Trigger class="hidden md:flex p-0 gap-1 absolute right-5 top-0.5 cursor-pointer">
