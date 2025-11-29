@@ -2,6 +2,13 @@ import { pbClient } from '$lib/pocketbase';
 import type { KeyPart } from '$types/openai';
 import {
   Collections,
+  type PatientRecordsResponse,
+  type PatientReportsResponse
+} from '$types/pocketbase';
+import { pbClient } from '$lib/pocketbase';
+import type { KeyPart } from '$types/openai';
+import {
+  Collections,
   type CreateBase,
   type PatientRecordsRecord,
   type PatientRecordsResponse,

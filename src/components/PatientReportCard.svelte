@@ -9,7 +9,7 @@
 <a href="{currentPath}/report/{patientReport.id}">
   <Card.Root class="cursor-pointer gap-2 transition-shadow">
     <Card.Header>
-      <Card.Title>Report 1 for Patient {patientReport.patient}</Card.Title>
+      <Card.Title>Report for Patient {patientReport.patient}</Card.Title>
     </Card.Header>
     <Card.Content></Card.Content>
   </Card.Root>
