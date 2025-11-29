@@ -4,19 +4,21 @@
   import * as Accordion from '$components/ui/accordion/index.js';
   import { formatDateTime } from '$lib/utils';
   import type { KeyPart } from '$types/openai';
+  import { Badge } from '$components/ui/badge/index.js';
+
   let {
     patientRecord,
     openRecordIds = $bindable(),
     isOpen = $bindable(),
     searchQuery = '',
-    hoveredCitation = $bindable(),
+    hoveredCitations = $bindable(),
     keyParts
   }: {
     patientRecord: PatientRecordsRecord;
     openRecordIds?: Set<string>;
     isOpen?: boolean;
     searchQuery?: string;
-    hoveredCitation?: string | null;
+    hoveredCitations?: string[] | null;
     keyParts: KeyPart[];
   } = $props();
 
@@ -26,67 +28,82 @@
 
   console.log(keyParts);
 
-  function applyDefaultUnderlines(text: string): string {
+  function applyDefaultUnderlines(text: string, isSummary: boolean = false): string {
     if (!text) return '';
+    if (isSummary) return text;
 
     let result = text;
 
     keyParts.forEach((part) => {
-      let citation = part.citation;
-      if (citation) {
-        // Remove starting and ending quotes
-        let cleanedCitation = citation.trim();
-        if (
-          (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
-          (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
-        ) {
-          cleanedCitation = cleanedCitation.slice(1, -1);
-        }
+      let citations = part.citations;
+      if (citations) {
+        const citationArray = Array.isArray(citations) ? citations : [citations];
 
-        const trimmedCitation = cleanedCitation.trim().toLowerCase();
-        if (trimmedCitation) {
-          // Escape special regex characters and allow flexible whitespace matching
-          const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
-
-          // Find matches case-insensitively in the original text (all occurrences)
-          const tempRegex = new RegExp(flexibleCitation, 'gi');
-          const matches = result.match(tempRegex);
-
-          if (matches) {
-            // Determine underline color based on importance
-            const importance = part.importance || 0;
-            let underlineColor = 'decoration-green-500'; // default for importance >= 3
-            if (importance === 1) {
-              underlineColor = 'decoration-red-500';
-            } else if (importance === 2) {
-              underlineColor = 'decoration-yellow-500';
-            }
-
-            // Replace all matches with colored underlined version
-            result = result.replace(
-              tempRegex,
-              `<u class="underline decoration-2 ${underlineColor}">$&</u>`
-            );
+        citationArray.forEach((citation) => {
+          // Remove starting and ending quotes
+          let cleanedCitation = citation.trim();
+          if (
+            (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
+            (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
+          ) {
+            cleanedCitation = cleanedCitation.slice(1, -1);
           }
-        }
+
+          const trimmedCitation = cleanedCitation.trim().toLowerCase();
+          if (trimmedCitation) {
+            // Escape special regex characters and allow flexible whitespace matching
+            const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+
+            // Find matches case-insensitively in the original text (all occurrences)
+            const tempRegex = new RegExp(flexibleCitation, 'gi');
+            const matches = result.match(tempRegex);
+
+            if (matches) {
+              // Determine underline color based on importance
+              const importance = part.importance || 0;
+              let underlineColor = 'decoration-green-500'; // default for importance >= 3
+              if (importance === 1) {
+                underlineColor = 'decoration-red-500';
+              } else if (importance === 2) {
+                underlineColor = 'decoration-yellow-500';
+              }
+
+              // Replace all matches with colored underlined version
+              result = result.replace(
+                tempRegex,
+                `<u class="underline decoration-2 ${underlineColor}">$&</u>`
+              );
+            }
+          }
+        });
       }
     });
 
     return result;
   }
 
-  function highlightText(text: string | undefined, query: string, citation: string | null): string {
+  function highlightText(
+    text: string | undefined,
+    query: string,
+    citation: string | null,
+    isSummary: boolean = false
+  ): string {
     if (!text) return '';
 
-    // Start with underlined citations
-    let result = applyDefaultUnderlines(text);
+    // Start with underlined citations (skip for summary)
+    let result = applyDefaultUnderlines(text, isSummary);
 
-    // Highlight hovered citation first (so it takes precedence)
-    if (citation) {
+    // Highlight hovered citation first (so it takes precedence) - skip for summary
+    if (citation && !isSummary) {
       console.log('Highlighting citation:', citation);
       // Find the matching key part to get its importance
-      const matchingPart = keyParts.find((part) => part.citation === citation);
+      const matchingPart = keyParts.find((part) => {
+        if (Array.isArray(part.citations)) {
+          return part.citations.includes(citation);
+        }
+        return part.citations === citation;
+      });
       const importance = matchingPart?.importance || 0;
 
       // Determine background color based on importance
@@ -147,8 +164,18 @@
         value = isOpen ? 'item-1' : undefined;
       }
     }
-    highlightedSummary = highlightText(patientRecord.summary, searchQuery, hoveredCitation ?? null);
-    highlightedText = highlightText(patientRecord.text, searchQuery, hoveredCitation ?? null);
+    highlightedSummary = highlightText(
+      patientRecord.summary,
+      searchQuery,
+      hoveredCitations && hoveredCitations.length > 0 ? hoveredCitations[0] : null,
+      true
+    );
+    highlightedText = highlightText(
+      patientRecord.text,
+      searchQuery,
+      hoveredCitations && hoveredCitations.length > 0 ? hoveredCitations[0] : null,
+      false
+    );
   });
 </script>
 
@@ -168,8 +195,24 @@
           {/if}
         </Accordion.Trigger>
         {#if patientRecord.summary}
-          <Card.Description>
-            {@html highlightedSummary}
+          <Card.Description class="flex flex-col gap-3">
+            <span>
+              {@html highlightedSummary}
+            </span>
+            <div class="flex flex-wrap gap-1">
+              {#each keyParts as part}
+                <Badge
+                  variant="default"
+                  class="{part.importance === 1
+                    ? 'bg-red-500'
+                    : part.importance === 2
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'} text-white"
+                >
+                  {part.types}
+                </Badge>
+              {/each}
+            </div>
           </Card.Description>
         {/if}
       </Card.Header>

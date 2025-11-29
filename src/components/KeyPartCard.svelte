@@ -5,8 +5,8 @@
 
   let {
     keyPart,
-    hoveredCitation = $bindable()
-  }: { keyPart: KeyPart; hoveredCitation?: string | null } = $props();
+    hoveredCitations = $bindable()
+  }: { keyPart: KeyPart; hoveredCitations?: string[] | null } = $props();
 
   const importanceColor = $derived(
     keyPart.importance === 1
@@ -20,8 +20,8 @@
 <Card.Root class="py-3 transition-shadow hover:shadow-[inset_0_0_0_4px_rgba(228,231,255,0.1)]">
   <Card.Header
     class="px-3"
-    onmouseenter={() => (hoveredCitation = keyPart.citation)}
-    onmouseleave={() => (hoveredCitation = null)}
+    onmouseenter={() => (hoveredCitations = keyPart.citations)}
+    onmouseleave={() => (hoveredCitations = null)}
   >
     <Card.Title class="flex justify-between items-center">
       {keyPart.reason}
@@ -30,7 +30,9 @@
       </span>
     </Card.Title>
     <Card.Description>
-      <Badge variant="default" class={'text-white ' + importanceColor}>{keyPart.type}</Badge>
+      {#each keyPart.types as type}
+        <Badge variant="default" class={'text-white ' + importanceColor}>{type}</Badge>
+      {/each}
     </Card.Description>
   </Card.Header>
 </Card.Root>
