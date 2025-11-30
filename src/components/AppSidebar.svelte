@@ -53,7 +53,7 @@
 </script>
 
 <Sidebar.Root>
-  <Sidebar.Content class="overflow-visible!">
+  <Sidebar.Content class="overflow-hidden">
     <Sidebar.Group class="h-full">
       <Sidebar.GroupLabel onclick={() => goto('/')}>
         <NotebookPen class="mr-2" />

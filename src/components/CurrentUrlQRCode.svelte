@@ -16,7 +16,7 @@
       type: 'svg',
       data: `https://docuhelper.site${currentPath}`,
       dotsOptions: {
-        color: '#4267b2',
+        color: 'currentColor',
         type: 'rounded'
       },
       backgroundOptions: {
@@ -40,4 +40,4 @@
   });
 </script>
 
-<div bind:this={canvasEl} class="w-full"></div>
+<div bind:this={canvasEl} class="hidden lg:block w-full"></div>

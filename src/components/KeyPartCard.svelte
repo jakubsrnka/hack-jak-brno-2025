@@ -15,14 +15,22 @@
         ? 'bg-yellow-500'
         : 'bg-green-500'
   );
+
+  const hoverShadowColor = $derived(
+    keyPart.importance === 1
+      ? 'hover:shadow-[inset_0_0_0_4px_rgba(239,68,68,0.3)]'
+      : keyPart.importance === 2
+        ? 'hover:shadow-[inset_0_0_0_4px_rgba(234,179,8,0.3)]'
+        : 'hover:shadow-[inset_0_0_0_4px_rgba(34,197,94,0.3)]'
+  );
 </script>
 
-<Card.Root class="py-3 transition-shadow hover:shadow-[inset_0_0_0_4px_rgba(228,231,255,0.1)]">
-  <Card.Header
-    class="px-3"
-    onmouseenter={() => (hoveredCitations = keyPart.citations)}
-    onmouseleave={() => (hoveredCitations = null)}
-  >
+<Card.Root
+  class="py-3 transition-shadow {hoverShadowColor}"
+  onmouseenter={() => (hoveredCitations = keyPart.citations)}
+  onmouseleave={() => (hoveredCitations = null)}
+>
+  <Card.Header class="px-3">
     <Card.Title class="flex justify-between items-center">
       {keyPart.reason}
       <span>
