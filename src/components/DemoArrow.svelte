@@ -4,7 +4,7 @@
   viewBox="0 0 127.00053408818258 126.97977566548752"
   width="127.00053408818258"
   height="126.97977566548752"
-  class="hidden lg:block scale-250 absolute left-20 top-[-230px]"
+  class="hidden lg:block scale-200 absolute left-15 top-[-170px]"
   ><!-- svg-source:excalidraw --><metadata></metadata><defs
     ><style class="style-fonts">
       @font-face {
