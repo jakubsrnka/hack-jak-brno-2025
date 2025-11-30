@@ -4,38 +4,44 @@
   import { breadcrumbItems } from '$lib/stores';
   import type { BreadcrumbItem } from '$types/breadcrumbs';
 
-  function buildBreadcrumbsRecursive(
+  const buildBreadcrumbs = (
     segments: string[],
-    itemsMap: Record<string, BreadcrumbItem> | undefined,
-    index = 0,
-    baseHref = ''
-  ): BreadcrumbItem[] {
-    if (index >= segments.length) return [];
+    items: Record<string, BreadcrumbItem> | undefined,
+    basePath: string = ''
+  ): BreadcrumbItem[] => {
+    if (segments.length === 0) {
+      return [];
+    }
 
-    const segment = segments[index];
-    if (!segment) return buildBreadcrumbsRecursive(segments, itemsMap, index + 1, baseHref);
+    const currentSegment = segments[0];
+    const currentPath = `${basePath}/${currentSegment}`;
+    const currentItem = items?.[currentSegment];
 
-    const href = `${baseHref}/${segment}`.replace(/\/+/g, '/');
-    const mapped = itemsMap?.[segment];
-    const current: BreadcrumbItem[] = mapped
-      ? [{ name: mapped.name, href: mapped.href ?? href }]
-      : [{ name: decodeURIComponent(segment), href }];
+    // If item exists in the store, use it; otherwise create from segment
+    const breadcrumbItem: BreadcrumbItem = currentItem || {
+      name: currentSegment.charAt(0).toUpperCase() + currentSegment.slice(1),
+      href: currentPath
+    };
 
-    return current.concat(buildBreadcrumbsRecursive(segments, itemsMap, index + 1, href));
-  }
+    // Recursively build breadcrumbs for remaining segments
+    const remainingBreadcrumbs = buildBreadcrumbs(
+      segments.slice(1),
+      currentItem?.items,
+      currentPath
+    );
+
+    return [breadcrumbItem, ...remainingBreadcrumbs];
+  };
 
   let breadcrumbs = $derived(
     (() => {
       const pathname = page.url.pathname;
-      const map = $breadcrumbItems;
       const segments = pathname.split('/').filter(Boolean);
       const result: BreadcrumbItem[] = [];
 
-      if (map?.name) {
-        result.push({ name: map.name, href: '/' });
-      }
+      result.push({ name: $breadcrumbItems.name, href: '/' });
 
-      return result.concat(buildBreadcrumbsRecursive(segments, map?.items, 0, ''));
+      return result.concat(buildBreadcrumbs(segments, $breadcrumbItems?.items));
     })()
   );
 </script>
