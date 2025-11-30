@@ -16,6 +16,7 @@
   import * as Popover from '$components/ui/popover/index.js';
   import { cn } from '$lib/utils.js';
   import type { KeyPart } from '$types/openai';
+  import { m } from '$lib/paraglide/messages';
 
   let reportId = page.params.reportId;
   let selectedRecordTypes = $state<string[]>([]);
@@ -134,6 +135,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>{m.page_patients_title()} | docuhelper.site</title>
+</svelte:head>
 
 <div class="flex gap-4 relative">
   <div class="flex flex-col gap-4 w-full h-full">

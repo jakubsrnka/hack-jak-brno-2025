@@ -36,6 +36,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>docuhelper.site</title>
+</svelte:head>
+
 <!-- Upload section -->
 <div
   class="mb-6 flex items-center gap-4 p-4 bg-linear-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20"
