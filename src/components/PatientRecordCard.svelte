@@ -2,7 +2,7 @@
   import type { PatientRecordsRecord } from '$types/pocketbase';
   import * as Card from '$components/ui/card/index.js';
   import * as Accordion from '$components/ui/accordion/index.js';
-  import { formatDateTime } from '$lib/utils';
+  import { formatDate } from '$lib/utils';
   import type { KeyPart } from '$types/openai';
   import { Badge } from '$components/ui/badge/index.js';
 
@@ -25,8 +25,6 @@
   let value = $state<string | undefined>(isOpen ? 'item-1' : undefined);
   let highlightedSummary = $state('');
   let highlightedText = $state('');
-
-  console.log(keyParts);
 
   function applyDefaultUnderlines(text: string, isSummary: boolean = false): string {
     if (!text) return '';
@@ -94,7 +92,7 @@
     // Start with underlined citations (skip for summary)
     let result = applyDefaultUnderlines(text, isSummary);
 
-    // Highlight hovered citation first (so it takes precedence) - skip for summary
+    // Highlight hovered citations (so they take precedence) - skip for summary
     if (citation && !isSummary) {
       console.log('Highlighting citation:', citation);
       // Find the matching key part to get its importance
@@ -114,31 +112,39 @@
         bgColor = 'bg-yellow-500';
       }
 
-      // Remove starting and ending quotes
-      let cleanedCitation = citation.trim();
-      if (
-        (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
-        (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
-      ) {
-        cleanedCitation = cleanedCitation.slice(1, -1);
-      }
+      // Get all citations for this keypart
+      const citationsToHighlight = matchingPart?.citations
+        ? Array.isArray(matchingPart.citations)
+          ? matchingPart.citations
+          : [matchingPart.citations]
+        : [citation];
 
-      const trimmedCitation = cleanedCitation.trim().toLowerCase();
-      if (trimmedCitation) {
-        // Escape special regex characters and allow flexible whitespace matching
-        const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
-
-        // Find matches case-insensitively in the original text (all occurrences)
-        const tempRegex = new RegExp(flexibleCitation, 'gi');
-        const matches = result.match(tempRegex);
-        console.log('Matches found:', matches);
-
-        if (matches) {
-          // Replace all matches with highlighted version using importance-based color
-          result = result.replace(tempRegex, `<mark class="${bgColor} text-white">$&</mark>`);
+      citationsToHighlight.forEach((citationText) => {
+        // Remove starting and ending quotes
+        let cleanedCitation = citationText.trim();
+        if (
+          (cleanedCitation.startsWith('"') && cleanedCitation.endsWith('"')) ||
+          (cleanedCitation.startsWith("'") && cleanedCitation.endsWith("'"))
+        ) {
+          cleanedCitation = cleanedCitation.slice(1, -1);
         }
-      }
+
+        const trimmedCitation = cleanedCitation.trim().toLowerCase();
+        if (trimmedCitation) {
+          // Escape special regex characters and allow flexible whitespace matching
+          const escapedCitation = trimmedCitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const flexibleCitation = escapedCitation.replace(/\s+/g, '\\s+');
+
+          // Find matches case-insensitively in the original text (all occurrences)
+          const tempRegex = new RegExp(flexibleCitation, 'gi');
+          const matches = result.match(tempRegex);
+
+          if (matches) {
+            // Replace all matches with highlighted version using importance-based color
+            result = result.replace(tempRegex, `<mark class="${bgColor} text-white">$&</mark>`);
+          }
+        }
+      });
     }
 
     // Highlight search query
@@ -176,6 +182,8 @@
       hoveredCitations && hoveredCitations.length > 0 ? hoveredCitations[0] : null,
       false
     );
+
+    console.log('Highlighted Summary:', hoveredCitations);
   });
 </script>
 
@@ -184,8 +192,8 @@
     <Card.Root class="gap-2 transition-shadow">
       <Card.Header class="relative gap-1">
         <Card.Title class="flex flex-col gap-2">
-          <span>{formatDateTime(patientRecord.date)}</span>
-          <span>{patientRecord.type}</span>
+          <span>Datum: {formatDate(patientRecord.date)}</span>
+          <span>Typ: {patientRecord.type}</span>
         </Card.Title>
         <Accordion.Trigger class="hidden md:flex p-0 gap-1 absolute right-5 top-0.5 cursor-pointer">
           {#if isOpen}
@@ -200,7 +208,7 @@
               {@html highlightedSummary}
             </span>
             <div class="flex flex-wrap gap-1">
-              {#each keyParts as part}
+              {#each keyParts as part, idx (idx)}
                 <Badge
                   variant="default"
                   class="{part.importance === 1

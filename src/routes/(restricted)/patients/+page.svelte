@@ -6,6 +6,7 @@
   import { currentUser } from '$lib/pocketbase';
   import { Skeleton } from '$components/ui/skeleton/index.js';
   import * as Card from '$components/ui/card/index.js';
+  import { breadcrumbItems, subMenuStore } from '$lib/stores';
 
   let patients: PatientsResponse[] = $state([]);
   let loading = $state(true);
@@ -14,6 +15,34 @@
     if ($currentUser) {
       const startTime = Date.now();
       patients = await getPatientsByDoctor([$currentUser.id]);
+      breadcrumbItems.set({
+        ...$breadcrumbItems,
+        items: {
+          ...$breadcrumbItems?.items,
+          patients: {
+            name: $breadcrumbItems?.items?.patients?.name || 'patients',
+            href: '/patients',
+            items: {
+              ...patients.reduce(
+                (acc, patient) => {
+                  acc[patient.id] = { name: patient.uuid, href: `/patients/${patient.id}` };
+                  return acc;
+                },
+                {} as Record<string, { name: string; href: string }>
+              )
+            }
+          }
+        }
+      });
+      console.log($breadcrumbItems);
+      subMenuStore.set(
+        patients
+          .map((patient) => ({
+            title: patient.uuid,
+            url: `/patients/${patient.id}`
+          }))
+          .sort((a, b) => a.title.localeCompare(b.title))
+      );
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 300 - elapsed);
       await new Promise((resolve) => setTimeout(resolve, remaining));

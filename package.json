@@ -41,6 +41,7 @@
     "qr-code-styling": "^1.9.2",
     "svelte": "^5.43.8",
     "svelte-check": "^4.3.4",
+    "svelte-persisted-store": "^0.12.0",
     "svelte-sonner": "^1.0.6",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",

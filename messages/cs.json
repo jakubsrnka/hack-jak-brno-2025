@@ -12,5 +12,12 @@
   "login_password": "Heslo",
   "login_successfulLogin": "Úspěšné přihlášení!",
   "login_wrongCredentials": "Špatné přihlašovací údaje",
+  "reports_created": "Vytvořeno",
+  "reports_noPatientsFound": "Nebyli nalezeni žádní pacienti",
+  "reports_noResults": "Nebyly nalezeny žádné výsledky",
+  "reports_searchPatients": "Hledat pacienty",
+  "reports_selectDates": "Filtrovat dle data",
+  "reports_selectPatients": "Filtrovat pacienty",
+  "reports_shortSummary": "Krátké shrnutí",
   "sidepanel_logout": "Odhlásit se"
 }

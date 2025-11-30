@@ -1,15 +1,8 @@
 <script lang="ts">
   import { Button } from '$components/ui/button';
   import { Skeleton } from '$components/ui/skeleton';
-  import { pbClient } from '$lib/pocketbase';
   import { getPatientReport } from '$lib/services';
   import type { KeyPart } from '$types/openai';
-  import {
-    Collections,
-    type PatientReportsRecord,
-    type PatientsRecord,
-    type PatientsResponse
-  } from '$types/pocketbase';
 
   let buttonText = $state('Send to AI');
 

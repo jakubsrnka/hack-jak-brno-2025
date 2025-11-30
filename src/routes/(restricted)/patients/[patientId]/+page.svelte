@@ -1,26 +1,31 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import PatientReportCard from '$components/PatientReportCard.svelte';
+  import ReportCard from '$components/ReportCard.svelte';
   import { getPatientReports } from '$lib/services';
-  import type { PatientReportsResponse } from '$types/pocketbase';
-  import { onMount } from 'svelte';
+  import type { PageData } from './$types';
+  import { Skeleton } from '$components/ui/skeleton';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/state';
 
-  let patientId = page.params.patientId;
-  let patientReports: PatientReportsResponse[] = $state([]);
-
-  onMount(async () => {
-    if (patientId) {
-      patientReports = await getPatientReports(patientId);
-    }
-  });
+  let { data }: { data: PageData } = $props();
+  let currentPath = page.url.pathname;
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-  {#if patientId}
+{#await getPatientReports(data.patientId)}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {#each Array(3)}
+      <Skeleton class="h-[140px] w-full rounded-lg" />
+    {/each}
+  </div>
+{:then patientReports}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
     {#each patientReports as report (report.id)}
-      {#if report.patient === patientId}
-        <PatientReportCard patientReport={report} />
+      {#if !!report.summary}
+        <ReportCard
+          created={report.created}
+          shortSummary={report.summary}
+          onclick={() => goto(`${currentPath}/report/${report.id}`)}
+        />
       {/if}
     {/each}
-  {/if}
-</div>
+  </div>
+{/await}

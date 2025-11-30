@@ -1,15 +1,20 @@
 <script lang="ts">
   import QRCodeStyling from 'qr-code-styling';
   import { page } from '$app/state';
+  import { onMount } from 'svelte';
 
   let currentPath = $derived(page.url.pathname);
+  let canvasEl: HTMLDivElement;
+  let qrCode: QRCodeStyling | null = null;
 
-  $effect(() => {
-    let qrCode = new QRCodeStyling({
-      width: 220,
-      height: 220,
+  onMount(() => {
+    const w = canvasEl.offsetWidth;
+
+    qrCode = new QRCodeStyling({
+      width: w,
+      height: w,
       type: 'svg',
-      data: `https://docuhelper.site${currentPath}?t=hjb2025`,
+      data: `https://docuhelper.site${currentPath}`,
       dotsOptions: {
         color: '#4267b2',
         type: 'rounded'
@@ -23,12 +28,16 @@
       }
     });
 
-    const el = document.getElementById('canvas');
-    if (el) {
-      el.innerHTML = '';
-      qrCode.append(el);
+    qrCode.append(canvasEl);
+  });
+
+  $effect(() => {
+    if (qrCode) {
+      qrCode.update({
+        data: `https://docuhelper.site${currentPath}`
+      });
     }
   });
 </script>
 
-<div id="canvas" class="w-full"></div>
+<div bind:this={canvasEl} class="w-full"></div>

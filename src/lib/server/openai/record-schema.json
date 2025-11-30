@@ -35,7 +35,8 @@
       "type": "array"
     },
     "summary": {
-      "type": "string"
+      "type": "string",
+      "maxLength": "__MAX_SUMMARY_LENGTH__"
     }
   },
   "required": ["summary", "keyParts"],
