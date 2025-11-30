@@ -40,4 +40,4 @@
   });
 </script>
 
-<div bind:this={canvasEl} class="w-full"></div>
+<div bind:this={canvasEl} class="hidden lg:block w-full"></div>
