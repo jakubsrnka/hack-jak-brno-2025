@@ -10,6 +10,7 @@
   import { page } from '$app/state';
   import CurrentUrlQRCode from '$components/CurrentUrlQRCode.svelte';
   import { subMenuStore } from '$lib/stores';
+  import DemoArrow from './DemoArrow.svelte';
 
   const items = [
     {
@@ -52,7 +53,7 @@
 </script>
 
 <Sidebar.Root>
-  <Sidebar.Content>
+  <Sidebar.Content class="overflow-visible!">
     <Sidebar.Group class="h-full">
       <Sidebar.GroupLabel onclick={() => goto('/')}>
         <NotebookPen class="mr-2" />
@@ -88,6 +89,7 @@
         <Sidebar.Footer>
           <Sidebar.Menu>
             <Sidebar.MenuItem>
+              <DemoArrow />
               <CurrentUrlQRCode />
             </Sidebar.MenuItem>
             <Sidebar.MenuItem>

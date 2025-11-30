@@ -13,6 +13,7 @@
   import PlusIcon from 'lucide-svelte/icons/plus';
   import HelpCircleIcon from 'lucide-svelte/icons/help-circle';
   import * as Tooltip from '$components/ui/tooltip';
+  import { m } from '$lib/paraglide/messages';
 
   // Define settings interface
   interface UserSettings {
@@ -75,6 +76,10 @@
     settings.searchKeys[index].key = key;
   }
 </script>
+
+<svelte:head>
+  <title>{m.page_settings_title()} | docuhelper.site</title>
+</svelte:head>
 
 <div class="container mx-auto max-w-4xl">
   <div class="mb-8">

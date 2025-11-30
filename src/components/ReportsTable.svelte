@@ -144,7 +144,7 @@
         </Button>
       </Popover.Trigger>
       <Popover.Content class="w-auto p-0" align="start">
-        <RangeCalendar bind:value={dateRange} />
+        <RangeCalendar bind:value={dateRange} locale={getLocale()} />
       </Popover.Content>
     </Popover.Root>
   </div>

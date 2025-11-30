@@ -10,6 +10,7 @@
   import CalendarIcon from 'lucide-svelte/icons/calendar';
   import FileTextIcon from 'lucide-svelte/icons/file-text';
   import { formatShortDate, formatWordDate } from '$lib/helpers/date';
+  import { m } from '$lib/paraglide/messages';
 
   let reportId = page.params.reportId;
   let patientRecords: PatientRecordsResponse[] = $state([]);
@@ -28,6 +29,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>{m.page_timeline_title()} | {m.page_patients_title()} | docuhelper.site</title>
+</svelte:head>
 
 <div class="flex flex-col gap-6 pb-6">
   <!-- Header -->

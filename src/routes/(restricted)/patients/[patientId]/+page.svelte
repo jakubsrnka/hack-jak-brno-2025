@@ -5,10 +5,15 @@
   import { Skeleton } from '$components/ui/skeleton';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import { m } from '$lib/paraglide/messages';
 
   let { data }: { data: PageData } = $props();
   let currentPath = page.url.pathname;
 </script>
+
+<svelte:head>
+  <title>{m.page_patients_title()} | docuhelper.site</title>
+</svelte:head>
 
 {#await getPatientReports(data.patientId)}
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

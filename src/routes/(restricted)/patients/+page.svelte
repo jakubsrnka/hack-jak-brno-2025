@@ -7,6 +7,7 @@
   import { Skeleton } from '$components/ui/skeleton/index.js';
   import * as Card from '$components/ui/card/index.js';
   import { breadcrumbItems, subMenuStore } from '$lib/stores';
+  import { m } from '$lib/paraglide/messages';
 
   let patients: PatientsResponse[] = $state([]);
   let loading = $state(true);
@@ -50,6 +51,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>{m.page_patients_title()} | docuhelper.site</title>
+</svelte:head>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
   {#if loading}

@@ -36,14 +36,20 @@
   }
 </script>
 
+<svelte:head>
+  <title>docuhelper.site</title>
+</svelte:head>
+
 <!-- Upload section -->
 <div
-  class="mb-6 flex items-center gap-4 p-4 bg-linear-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20"
+  class="mb-6 flex items-center gap-4 p-4 bg-linear-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20 flex-col md:flex-row"
 >
   <div class="p-3 bg-primary/10 rounded-full">
     <FileTextIcon class="h-6 w-6 text-primary" />
   </div>
-  <h2 class="text-xl font-semibold flex-1">Nahrát zdravotní dokumentaci</h2>
+  <h2 class="text-xl font-semibold flex-1 text-center md:text-left">
+    Nahrát zdravotní dokumentaci
+  </h2>
   <Button size="lg" onclick={openUploadDialog}>
     <UploadIcon class="h-4 w-4 mr-2" />
     Nahrát dokumentaci
