@@ -6,7 +6,7 @@
   import { currentUser } from '$lib/pocketbase';
   import { Skeleton } from '$components/ui/skeleton/index.js';
   import * as Card from '$components/ui/card/index.js';
-  import { subMenuStore } from '$lib/stores';
+  import { breadcrumbItems, subMenuStore } from '$lib/stores';
 
   let patients: PatientsResponse[] = $state([]);
   let loading = $state(true);
@@ -15,6 +15,26 @@
     if ($currentUser) {
       const startTime = Date.now();
       patients = await getPatientsByDoctor([$currentUser.id]);
+      breadcrumbItems.set({
+        ...$breadcrumbItems,
+        items: {
+          ...$breadcrumbItems?.items,
+          patients: {
+            name: $breadcrumbItems?.items?.patients?.name || 'patients',
+            href: '/patients',
+            items: {
+              ...patients.reduce(
+                (acc, patient) => {
+                  acc[patient.id] = { name: patient.uuid, href: `/patients/${patient.id}` };
+                  return acc;
+                },
+                {} as Record<string, { name: string; href: string }>
+              )
+            }
+          }
+        }
+      });
+      console.log($breadcrumbItems);
       subMenuStore.set(
         patients
           .map((patient) => ({
