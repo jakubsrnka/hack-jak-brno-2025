@@ -22,6 +22,7 @@
   let selectedRecordTypes = $state<string[]>([]);
   let selectedKeyPartTypes = $state<string[]>([]);
   let searchQuery = $state<string>('');
+  let dateSort = $state<'asc' | 'desc'>('desc');
   let patientRecords: PatientRecordsResponse[] = $state([]);
   let patientReport: PatientReportsResponse | null = $state(null);
 
@@ -55,6 +56,7 @@
 
   let open = $state(false);
   let keyPartOpen = $state(false);
+  let showFilters = $state(false);
   let triggerRef = $state<HTMLButtonElement>(null!);
   let keyPartTriggerRef = $state<HTMLButtonElement>(null!);
 
@@ -73,33 +75,38 @@
         ? selectedKeyPartTypes[0]
         : `${selectedKeyPartTypes.length} typů`
   );
-
   const filteredRecords = $derived(
-    patientRecords.filter((record) => {
-      if (record.report !== reportId) return false;
+    patientRecords
+      .filter((record) => {
+        if (record.report !== reportId) return false;
 
-      if (selectedRecordTypes.length > 0 && !selectedRecordTypes.includes(record.type))
-        return false;
+        if (selectedRecordTypes.length > 0 && !selectedRecordTypes.includes(record.type))
+          return false;
 
-      if (selectedKeyPartTypes.length > 0) {
-        const recordKeyPartTypes =
-          (record.keyParts as KeyPart[])?.flatMap((part) => part.types || []) || [];
-        const hasMatchingKeyPartType = selectedKeyPartTypes.some((type) =>
-          recordKeyPartTypes.includes(type)
-        );
-        if (!hasMatchingKeyPartType) return false;
-      }
+        if (selectedKeyPartTypes.length > 0) {
+          const recordKeyPartTypes =
+            (record.keyParts as KeyPart[])?.flatMap((part) => part.types || []) || [];
+          const hasMatchingKeyPartType = selectedKeyPartTypes.some((type) =>
+            recordKeyPartTypes.includes(type)
+          );
+          if (!hasMatchingKeyPartType) return false;
+        }
 
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesText = record.text?.toLowerCase().includes(query);
-        const matchesSummary = record.summary?.toLowerCase().includes(query);
-        const matchesType = record.type?.toLowerCase().includes(query);
-        return matchesText || matchesSummary || matchesType;
-      }
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const matchesText = record.text?.toLowerCase().includes(query);
+          const matchesSummary = record.summary?.toLowerCase().includes(query);
+          const matchesType = record.type?.toLowerCase().includes(query);
+          return matchesText || matchesSummary || matchesType;
+        }
 
-      return true;
-    })
+        return true;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateSort === 'asc' ? dateA - dateB : dateB - dateA;
+      })
   );
 
   function toggleRecordType(type: string) {
@@ -142,107 +149,123 @@
 
 <div class="flex gap-4 relative">
   <div class="flex flex-col gap-4 w-full h-full">
-    <div class="flex flex-col md:flex-row gap-4 py-6 shrink-0 sticky z-10 top-0 bg-background">
-      <div class="flex flex-col gap-2">
-        <Popover.Root bind:open>
-          <Popover.Trigger bind:ref={triggerRef}>
-            {#snippet child({ props })}
-              <Button
-                variant="outline"
-                class="w-[200px] justify-between"
-                {...props}
-                role="combobox"
-                aria-expanded={open}
-              >
-                {selectedValue}
-                <ChevronsUpDownIcon class="ms-2 size-4 shrink-0 opacity-50" />
-              </Button>
-            {/snippet}
-          </Popover.Trigger>
-          <Popover.Content class="w-[200px] p-0">
-            <Command.Root>
-              <Command.Input placeholder="Typy záznamů..." />
-              <Command.List>
-                <Command.Empty>Typ nenalezen</Command.Empty>
-                <Command.Group>
-                  {#each recordTypeOptions as recordType, idx (idx)}
-                    <Command.Item
-                      value={recordType.value}
-                      onSelect={() => {
-                        toggleRecordType(recordType.value);
-                      }}
-                    >
-                      <CheckIcon
-                        class={cn(
-                          'me-2 size-4',
-                          !selectedRecordTypes.includes(recordType.value) && 'text-transparent'
-                        )}
-                      />
-                      {recordType.label}
-                    </Command.Item>
-                  {/each}
-                </Command.Group>
-              </Command.List>
-            </Command.Root>
-          </Popover.Content>
-        </Popover.Root>
-      </div>
-      <div class="flex flex-col gap-2">
-        <Popover.Root bind:open={keyPartOpen}>
-          <Popover.Trigger bind:ref={keyPartTriggerRef}>
-            {#snippet child({ props })}
-              <Button
-                variant="outline"
-                class="w-[200px] justify-between"
-                {...props}
-                role="combobox"
-                aria-expanded={keyPartOpen}
-              >
-                {selectedKeyPartValue}
-                <ChevronsUpDownIcon class="ms-2 size-4 shrink-0 opacity-50" />
-              </Button>
-            {/snippet}
-          </Popover.Trigger>
-          <Popover.Content class="w-[200px] p-0">
-            <Command.Root>
-              <Command.Input placeholder="Klíčové informace..." />
-              <Command.List>
-                <Command.Empty>Typ nenalezen</Command.Empty>
-                <Command.Group>
-                  {#each keyPartTypeOptions as keyPartType, idx (idx)}
-                    <Command.Item
-                      value={keyPartType.value}
-                      onSelect={() => {
-                        toggleKeyPartType(keyPartType.value);
-                      }}
-                    >
-                      <CheckIcon
-                        class={cn(
-                          'me-2 size-4',
-                          !selectedKeyPartTypes.includes(keyPartType.value) && 'text-transparent'
-                        )}
-                      />
-                      {keyPartType.label}
-                    </Command.Item>
-                  {/each}
-                </Command.Group>
-              </Command.List>
-            </Command.Root>
-          </Popover.Content>
-        </Popover.Root>
-      </div>
-      <div class="flex flex-col gap-2 w-full">
-        <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
-      </div>
-      <div class="flex flex-col gap-2 justify-end">
-        <Button
-          variant="outline"
-          onclick={() => goto(`/patients/${page.params.patientId}/report/${reportId}/timeline`)}
-          class="whitespace-nowrap"
-        >
-          <ClockIcon class="h-4 w-4 mr-2" />
-          Časová osa
+    <div class="flex flex-col gap-4 py-6 shrink-0 sticky z-10 top-0 bg-background">
+      <div class="flex md:hidden">
+        <Button variant="outline" onclick={() => (showFilters = !showFilters)} class="w-full">
+          {showFilters ? 'Skrýt filtry' : 'Zobrazit filtry'}
         </Button>
+      </div>
+      <div class="grid-cols-1 md:grid-cols-3 gap-4 {showFilters ? 'grid' : 'hidden md:grid'}">
+        <div class="flex flex-col gap-2">
+          <Popover.Root bind:open>
+            <Popover.Trigger bind:ref={triggerRef}>
+              {#snippet child({ props })}
+                <Button
+                  variant="outline"
+                  class="w-[200px] justify-between"
+                  {...props}
+                  role="combobox"
+                  aria-expanded={open}
+                >
+                  {selectedValue}
+                  <ChevronsUpDownIcon class="ms-2 size-4 shrink-0 opacity-50" />
+                </Button>
+              {/snippet}
+            </Popover.Trigger>
+            <Popover.Content class="w-[200px] p-0">
+              <Command.Root>
+                <Command.Input placeholder="Typy záznamů..." />
+                <Command.List>
+                  <Command.Empty>Typ nenalezen</Command.Empty>
+                  <Command.Group>
+                    {#each recordTypeOptions as recordType, idx (idx)}
+                      <Command.Item
+                        value={recordType.value}
+                        onSelect={() => {
+                          toggleRecordType(recordType.value);
+                        }}
+                      >
+                        <CheckIcon
+                          class={cn(
+                            'me-2 size-4',
+                            !selectedRecordTypes.includes(recordType.value) && 'text-transparent'
+                          )}
+                        />
+                        {recordType.label}
+                      </Command.Item>
+                    {/each}
+                  </Command.Group>
+                </Command.List>
+              </Command.Root>
+            </Popover.Content>
+          </Popover.Root>
+        </div>
+        <div class="flex flex-col gap-2">
+          <Popover.Root bind:open={keyPartOpen}>
+            <Popover.Trigger bind:ref={keyPartTriggerRef}>
+              {#snippet child({ props })}
+                <Button
+                  variant="outline"
+                  class="w-[200px] justify-between"
+                  {...props}
+                  role="combobox"
+                  aria-expanded={keyPartOpen}
+                >
+                  {selectedKeyPartValue}
+                  <ChevronsUpDownIcon class="ms-2 size-4 shrink-0 opacity-50" />
+                </Button>
+              {/snippet}
+            </Popover.Trigger>
+            <Popover.Content class="w-[200px] p-0">
+              <Command.Root>
+                <Command.Input placeholder="Klíčové informace..." />
+                <Command.List>
+                  <Command.Empty>Typ nenalezen</Command.Empty>
+                  <Command.Group>
+                    {#each keyPartTypeOptions as keyPartType, idx (idx)}
+                      <Command.Item
+                        value={keyPartType.value}
+                        onSelect={() => {
+                          toggleKeyPartType(keyPartType.value);
+                        }}
+                      >
+                        <CheckIcon
+                          class={cn(
+                            'me-2 size-4',
+                            !selectedKeyPartTypes.includes(keyPartType.value) && 'text-transparent'
+                          )}
+                        />
+                        {keyPartType.label}
+                      </Command.Item>
+                    {/each}
+                  </Command.Group>
+                </Command.List>
+              </Command.Root>
+            </Popover.Content>
+          </Popover.Root>
+        </div>
+        <div class="flex flex-col gap-2">
+          <Button
+            variant="outline"
+            onclick={() => (dateSort = dateSort === 'asc' ? 'desc' : 'asc')}
+            class="w-full"
+          >
+            Datum: {dateSort === 'asc' ? 'Nejstarší' : 'Nejnovější'}
+          </Button>
+        </div>
+        <div class="flex flex-col gap-2 justify-end">
+          <Button
+            variant="outline"
+            onclick={() => goto(`/patients/${page.params.patientId}/report/${reportId}/timeline`)}
+            class="whitespace-nowrap"
+          >
+            <ClockIcon class="h-4 w-4 mr-2" />
+            Časová osa
+          </Button>
+        </div>
+        <div class="flex flex-col gap-2 w-full md:col-span-2">
+          <Input bind:value={searchQuery} placeholder="Hledat..." class="flex-1 min-h-9" />
+        </div>
       </div>
     </div>
     {#if !searchQuery && selectedRecordTypes.length === 0 && selectedKeyPartTypes.length === 0}
