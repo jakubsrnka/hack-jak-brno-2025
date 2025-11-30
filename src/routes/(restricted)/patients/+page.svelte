@@ -59,12 +59,13 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
   {#if loading}
     {#each Array(8) as _, i (i)}
-      <Card.Root class="max-h-[106px] gap-2">
-        <Card.Header class="gap-0">
-          <Skeleton class="h-6 w-6 rounded-2xl" />
+      <Card.Root class="flex flex-col h-[220px] gap-6">
+        <Card.Header class="gap-0 justify-center mt-4">
+          <Skeleton class="h-16 w-16 rounded-[9999px]" />
         </Card.Header>
         <Card.Content>
-          <Skeleton class="h-6 w-full" />
+          <Skeleton class="h-4 w-full mb-1" />
+          <Skeleton class="h-7 w-full" />
         </Card.Content>
       </Card.Root>
     {/each}
